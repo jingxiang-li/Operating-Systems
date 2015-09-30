@@ -1,6 +1,5 @@
 CC=gcc
-IDIR=./header
-CFLAGS=-Wall -O1 -std=c11 -I$(IDIR)
+CFLAGS=-Wall -O1 -std=c11
 
 all: graphexec
 
@@ -10,28 +9,28 @@ graphexec: main.o readGraph.o proctype.o makeargv.o checkcycle.o
 main.o: main.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-readGraphExe.o: readGraphExe.c $(IDIR)/readGraphExe.h
+readGraphExe.o: readGraphExe.c readGraphExe.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-proctype.o: proctype.c $(IDIR)/proctype.h
+proctype.o: proctype.c proctype.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-makeargv.o: makeargv.c $(IDIR)/makeargv.h
+makeargv.o: makeargv.c makeargv.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-checkcycle.o: checkcycle.c $(IDIR)/checkcycle.h
+checkcycle.o: checkcycle.c checkcycle.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
 	rm -f *.o *~ graphexec tsort*
 
 test:
-	./graphexec ../pa1-release/testgraph0.txt
-	./graphexec ../pa1-release/testgraph1.txt
-	./graphexec ../pa1-release/testgraph2.txt
-	./graphexec ../pa1-release/testgraph3.txt
-	./graphexec ../pa1-release/testgraph4.txt
-	./graphexec ../pa1-release/testgraph5.txt
-	./graphexec ../pa1-release/testCycle0.txt
-	./graphexec ../pa1-release/testCycle1.txt
-
+	./graphexec ../res/pa1-release/testgraph0.txt
+	./graphexec ../res/pa1-release/testgraph1.txt
+	./graphexec ../res/pa1-release/testgraph2.txt
+	./graphexec ../res/pa1-release/testgraph3.txt
+	./graphexec ../res/pa1-release/testgraph4.txt
+	./graphexec ../res/pa1-release/testgraph5.txt
+	./graphexec ../res/pa1-release/testCycle0.txt
+	./graphexec ../res/pa1-release/testCycle1.txt
+	./graphexec ../res/pa1-release/testfail0.txt

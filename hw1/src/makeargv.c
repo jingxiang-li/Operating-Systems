@@ -1,61 +1,58 @@
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 #include "makeargv.h"
 
-int makeargv (const char *s, const char *delimiters, char ***argvp) {
+int makeargv(const char *s, const char *delimiters, char ***argvp) {
+  int error;
+  int i;
+  int numtokens;
+  const char *snew;
+  char *t;
 
-	int error;
-	int i;
-	int numtokens;
-	const char *snew;
-	char *t;
+  if ((s == NULL) || (delimiters == NULL) || (argvp == NULL)) {
+    errno = EINVAL;
+    return -1;
+  }
 
-	if ((s == NULL) || (delimiters == NULL) || (argvp == NULL)){
+  *argvp = NULL;  // already assigned as a new var, just blanking out
 
-		errno = EINVAL;
-		return -1;
+  snew = s + strspn(s, delimiters);
 
-	}
+  if ((t = (char *)malloc(strlen(snew) + 1)) == NULL) return -1;
 
-	*argvp = NULL; // already assigned as a new var, just blanking out
+  strcpy(t, snew);
 
-	snew = s + strspn(s, delimiters);
+  numtokens = 0;
 
-	if ((t = malloc(strlen(snew) + 1)) == NULL)
-		return -1;
+  if (strtok(t, delimiters) != NULL)  // count number of tokens in s
+    for (numtokens = 1; strtok(NULL, delimiters) != NULL; numtokens++)
+      ;
 
-	strcpy(t, snew);
+  // create arg array for pointers to tokens
+  if ((*argvp = (char **)malloc((numtokens + 1) * sizeof(char *))) == NULL) {
+    error = errno;
+    free(t);
+    errno = error;
+    return -1;
+  }
 
-	numtokens = 0;
+  // insert pointers to tokens into the arg array
+  if (numtokens == 0)
+    free(t);
 
-	if (strtok(t, delimiters) != NULL) // count number of tokens in s
-		for (numtokens = 1; strtok(NULL, delimiters) != NULL; numtokens++);
+  else {
+    strcpy(t, snew);
+    **argvp = strtok(t, delimiters);
+    for (i = 1; i < numtokens; i++) *((*argvp) + i) = strtok(NULL, delimiters);
+  }
 
-	// create arg array for pointers to tokens
-	if ((*argvp = malloc((numtokens + 1)*sizeof(char *))) == NULL){
-		error = errno;
-		free(t);
-		errno = error;
-		return -1;
-	}
-
-	// insert pointers to tokens into the arg array
-	if (numtokens == 0)
-		free(t);
-
-	else{
-		strcpy(t, snew);
-		**argvp = strtok(t, delimiters);
-		for(i = 1; i < numtokens; i++)
-			*((*argvp) + i) = strtok(NULL, delimiters);
-	}
-
-	*((*argvp) + numtokens) = NULL; // put in final NULL pointer
-	return numtokens;
+  *((*argvp) + numtokens) = NULL;  // put in final NULL pointer
+  return numtokens;
 }
 
 void freemakeargv(char **argv) {
-    if (argv == NULL)
-        return ;
-    if (*argv != NULL)
-        free(*argv);
-    free(argv);
+  if (argv == NULL) return;
+  if (*argv != NULL) free(*argv);
+  free(argv);
 }
