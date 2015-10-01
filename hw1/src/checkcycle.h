@@ -5,4 +5,7 @@
 
 int checkCycle(ProcNode *proc_node_array, int num_proc);
 
+int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
+                    int **topological_order);
+
 #endif

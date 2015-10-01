@@ -1,15 +1,15 @@
 CC=gcc
-CFLAGS=-Wall -O1 -std=c11
+CFLAGS=-g -Wall -fstack-protector -Wextra -Wunreachable-code -O1 -std=c99
 
 all: graphexec
 
-graphexec: main.o readGraph.o proctype.o makeargv.o checkcycle.o
+graphexec: main.o read_graph.o proctype.o makeargv.o checkcycle.o proc_utility.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 main.o: main.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-readGraphExe.o: readGraphExe.c readGraphExe.h
+read_graph.o: read_graph.c read_graph.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 proctype.o: proctype.c proctype.h
@@ -21,8 +21,12 @@ makeargv.o: makeargv.c makeargv.h
 checkcycle.o: checkcycle.c checkcycle.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+proc_utility.o: proc_utility.c proc_utility.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+
 clean:
-	rm -f *.o *~ graphexec tsort*
+	rm -f *.o *~ graphexec tsort* *.out *.txt
+	rm -rf .tmp 5testFolder
 
 test:
 	./graphexec ../res/pa1-release/testgraph0.txt

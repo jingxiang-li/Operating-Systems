@@ -5,35 +5,39 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "readGraph.h"
+#include "read_graph.h"
 #include "checkcycle.h"
+#include "proc_utility.h"
 
 int main(int argc, char **argv) {
-  // Graph *graph = createGraph(5);
-  // addEdge(graph, 0, 0);
-  // addEdge(graph, 0, 1);
-  // addEdge(graph, 0, 2);
-  // addEdge(graph, 0, 3);
-  // addEdge(graph, 1, 1);
-  // addEdge(graph, 1, 2);
-  // addEdge(graph, 2, 3);
-  // addEdge(graph, 2, 0);
-  // addEdge(graph, 3, 4);
-  // addEdge(graph, 4, 4);
-  // printGraph(graph);
-
+  // read process file as a node array
   ProcNode *proc_node_array;
-  int num_proc;
-  num_proc = read_graph_file(argc, argv, &proc_node_array);
-  // remember to free proc_node_arrayx
-  int i;
-  printf("\n");
-  for (i = 0; i < num_proc; i++) {
-    printProcNodeFormat(proc_node_array + i);
+  int num_proc = read_graph_file(argc, argv, &proc_node_array);
+
+  // print the node array for debug
+  // for (int i = 0; i < num_proc; i++) {
+  //   printProcNodeFormat(proc_node_array + i);
+  //   if (runProcess(proc_node_array + i) == -1)
+  //     continue;
+  // }
+
+  // check if the process graph has an cycle
+  int *topological_order;
+  if (checkCycleFancy(proc_node_array, num_proc, &topological_order) == 1) {
+    free(proc_node_array);
+    return 0;
   }
-  checkCycle(proc_node_array, num_proc);
-  printf("\n\n");
-  // return 1 then have cycle, return 0 no cycle, return -1 error happens
+
+  // try to run processes
+  for (int i = 0; i < num_proc; i++) {
+    // printProcNodeFormat(proc_node_array + topological_order[i]);
+    if (runProcess(proc_node_array + topological_order[i]) == -1) continue;
+  }
+
+  // make a temporary folder for holding the status files of processes
+  // struct stat st = {0};
+  // if (stat("./.tmp", &st) == -1)
+  //     mkdir("./.tmp", 0700);
 
   free(proc_node_array);
   return 0;

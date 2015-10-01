@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include "proctype.h"
 
-void printProcNode(ProcNode *n) {
+int printProcNode(ProcNode *n) {
+  if (n == NULL) {
+    fprintf(stderr, "Can't print the process node, illegal access!!\n");
+    return -1;
+  }
   printf("id: %d\n", n->id);
   printf("prog: %s\n", n->prog);
   printf("input: %s\n", n->input);
@@ -15,14 +19,23 @@ void printProcNode(ProcNode *n) {
   printf("status: %d\n", n->status);
   printf("pid: %d\n", n->pid);
   printf("\n");
+  return 0;
 }
 
-void printProcNodeFormat(ProcNode *n) {
+int printProcNodeFormat(ProcNode *n) {
+  if (n == NULL) {
+    fprintf(stderr, "Can't print format the process node, illegal access!!\n");
+    return -1;
+  }
   printf("%s:", n->prog);
-  for (int i = 0; i!= n->num_children; i++)
-    printf("%d ", n->children[i]);
-  printf(":%s:%s", n->input, n->output);
+  if (n->num_children == 0)
+    printf("none:");
+  else {
+    for (int i = 0; i != n->num_children - 1; i++)
+      printf("%d ", n->children[i]);
+    printf("%d:", n->children[n->num_children - 1]);
+  }
+  printf("%s:%s", n->input, n->output);
   printf("\n");
+  return 0;
 }
-
-//echo wazzup:2 3:blank-file.txt:1echo2.out

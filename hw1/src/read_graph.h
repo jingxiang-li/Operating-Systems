@@ -8,9 +8,9 @@
 
 int countLines(FILE *stream);
 
-void convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node);
+int convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node);
 
-void convert_string_to_ProcNode(const char *line, int count,
+int convert_string_to_ProcNode(const char *line, int count,
                                 ProcNode *proc_node);
 
 int read_graph_file(int argc, char **argv, ProcNode **proc_node_array);
