@@ -81,6 +81,18 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
   }
   char ch = fgetc(tsort_output);
   fclose(tsort_output);
+
+  // remove tsort_output.txt and tsort_input.txt
+  if (remove("./tsort_input.txt") == -1) {
+    perror("Unable to delete ./tsort_input.txt");
+    return -1;
+  }
+
+  if (remove("./tsort_output.txt") == -1) {
+    perror("Unable to delete ./tsort_output.txt");
+    return -1;
+  }
+
   if (ch < '0' || ch > '9') {
     printf("FIND CYCLE!!!\n");
     return 1;
@@ -176,6 +188,16 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
     (*topological_order)[ii++] = node_id;
   }
   if (ii != num_proc) printf("something wrong here\n");
+  // remove tsort_output.txt and tsort_input.txt
+  if (remove("./tsort_input.txt") == -1) {
+    perror("Unable to delete ./tsort_input.txt");
+    return -1;
+  }
+  if (remove("./tsort_output.txt") == -1) {
+    perror("Unable to delete ./tsort_output.txt");
+    return -1;
+  }
+
   fclose(tsort_output);
   return 0;
 }
