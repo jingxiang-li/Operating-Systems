@@ -26,7 +26,7 @@ proc_utility.o: proc_utility.c proc_utility.h
 
 clean:
 	rm -f *.o *~ graphexec tsort* *.out *.txt
-	rm -rf .tmp 5testFolder
+	rm -rf ./output
 
 test:
 	./graphexec ../res/pa1-release/testgraph0.txt
