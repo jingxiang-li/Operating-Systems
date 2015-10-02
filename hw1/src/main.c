@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   // change working dir to ./output
   struct stat wd_st = {0};
   if (stat("./output", &wd_st) == -1) {
-      mkdir("./output", 0700);
+    mkdir("./output", 0700);
   }
   if (stat("./output", &wd_st) == -1) {
     perror("can't make output directory ./output");

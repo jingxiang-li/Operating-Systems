@@ -29,7 +29,8 @@ int countLines(FILE *stream) {
 int convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node) {
   if (argv == NULL || proc_node == NULL) {
     printf(
-        "Failed to convert argv to Process Node, argv or proc_node is not allocated well\n");
+        "Failed to convert argv to Process Node, argv or proc_node is not "
+        "allocated well\n");
     perror(NULL);
     return -1;
   }
@@ -75,8 +76,8 @@ int convert_string_to_ProcNode(const char *str, int count,
                                ProcNode *proc_node) {
   if (str == NULL || proc_node == NULL) {
     perror(
-            "Failed to convert string to ProcNode, str or proc_node is not "
-            "well allocated");
+        "Failed to convert string to ProcNode, str or proc_node is not "
+        "well allocated");
     return -1;
   }
 
