@@ -13,12 +13,12 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
   int i, j;
 
   if (proc_node_array == NULL) {
-    fprintf(stderr, "Failed to check cycle in the graph\n");
+    perror("Failed to check cycle in the graph");
     return -1;
   }
   FILE *tsort_input = fopen("tsort_input.txt", "w");
   if (tsort_input == NULL) {
-    fprintf(stderr, "Failed to create tsort_input.txt\n");
+    perror("Failed to create tsort_input.txt");
     return -1;
   }
 
@@ -37,14 +37,14 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
   int tsort_output_fd =
       open("./tsort_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (tsort_output_fd < 0) {
-    fprintf(stderr, "Error opening tsort_output.txt\n");
+    perror("Error opening tsort_output.txt");
     return -1;
   }
 
   pid_t child_id;
   child_id = fork();
   if (child_id == -1) {
-    fprintf(stderr, "Failed to fork a child\n");
+    perror("Failed to fork a child");
     return -1;
   }
   if (child_id == 0) {
@@ -64,7 +64,7 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
     dup2(saved_stderr, STDERR_FILENO);
     close(saved_stdout);
     close(saved_stderr);
-    fprintf(stderr, "Failed to execute tsort\n");
+    perror("Failed to execute tsort");
     exit(EXIT_FAILURE);
   } else {
     // this is parent, wait for child
@@ -76,7 +76,7 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
   // get tsort output and determine whether these is a cycle
   FILE *tsort_output = fopen("./tsort_output.txt", "r");
   if (tsort_output == NULL) {
-    fprintf(stderr, "Failed to open tsort_output.txt\n");
+    perror("Failed to open tsort_output.txt");
     return -1;
   }
   char ch = fgetc(tsort_output);
@@ -104,12 +104,12 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
                     int **topological_order) {
   int i, j;
   if (proc_node_array == NULL) {
-    fprintf(stderr, "Failed to check cycle in the graph\n");
+    perror("Failed to check cycle in the graph");
     return -1;
   }
   FILE *tsort_input = fopen("tsort_input.txt", "w");
   if (tsort_input == NULL) {
-    fprintf(stderr, "Failed to create tsort_input.txt\n");
+    perror("Failed to create tsort_input.txt");
     return -1;
   }
 
@@ -134,14 +134,14 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
   int tsort_output_fd =
       open("./tsort_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (tsort_output_fd < 0) {
-    fprintf(stderr, "Error opening tsort_output.txt\n");
+    perror("Error opening tsort_output.txt");
     return -1;
   }
 
   pid_t child_id;
   child_id = fork();
   if (child_id == -1) {
-    fprintf(stderr, "Failed to fork a child\n");
+    perror("Failed to fork a child");
     return -1;
   }
   if (child_id == 0) {
@@ -161,7 +161,7 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
     dup2(saved_stderr, STDERR_FILENO);
     close(saved_stdout);
     close(saved_stderr);
-    fprintf(stderr, "Failed to execute tsort\n");
+    perror("Failed to execute tsort");
     exit(EXIT_FAILURE);
   } else {
     // this is parent, wait for child
@@ -173,7 +173,7 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
   // get tsort output and determine whether these is a cycle
   FILE *tsort_output = fopen("./tsort_output.txt", "r");
   if (tsort_output == NULL) {
-    fprintf(stderr, "Failed to open tsort_output.txt\n");
+    perror("Failed to open tsort_output.txt");
     return -1;
   }
 
@@ -187,7 +187,7 @@ int checkCycleFancy(ProcNode *proc_node_array, int num_proc,
     sscanf(line, "%d", &node_id);
     (*topological_order)[ii++] = node_id;
   }
-  if (ii != num_proc) printf("something wrong here\n");
+
   // remove tsort_output.txt and tsort_input.txt
   if (remove("./tsort_input.txt") == -1) {
     perror("Unable to delete ./tsort_input.txt");

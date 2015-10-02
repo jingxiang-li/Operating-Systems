@@ -3,7 +3,7 @@
 
 int printProcNode(ProcNode *n) {
   if (n == NULL) {
-    fprintf(stderr, "Can't print the process node, illegal access!!\n");
+    perror("Can't print the process node, illegal access");
     return -1;
   }
   printf("id: %d\n", n->id);
@@ -24,7 +24,7 @@ int printProcNode(ProcNode *n) {
 
 int printProcNodeFormat(ProcNode *n) {
   if (n == NULL) {
-    fprintf(stderr, "Can't print format the process node, illegal access!!\n");
+    perror("Can't print format the process node, illegal access");
     return -1;
   }
   printf("%s:", n->prog);

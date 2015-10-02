@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <error.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include "makeargv.h"
@@ -12,15 +13,14 @@ static const int buffer_size = 1024;
 
 int runProcess(ProcNode *n) {
   if (n == NULL) {
-    fprintf(stderr,
-            "Can't run the process, illegal access to the processs node!!\n");
+    perror("Can't run the process, illegal access to the processs node!!\n");
     return -1;
   }
 
   pid_t child_id;
   child_id = fork();
   if (child_id == -1) {
-    fprintf(stderr, "Failed to fork a child\n");
+    perror("Failed to fork a child");
     return -1;
   }
   if (child_id == 0) {
@@ -29,13 +29,12 @@ int runProcess(ProcNode *n) {
       // we need a output file
       int output_fd = open(n->output, O_WRONLY | O_CREAT | O_TRUNC, 0700);
       if (output_fd < 0) {
-        fprintf(stderr, "Failed to create or write %s\n", n->output);
+        perror("Failed to create or write output file");
         exit(EXIT_FAILURE);
       }
       char **execl_argv = procNodeToArgv(n);
       if (execl_argv == NULL) {
-        fprintf(stderr,
-                "Failed to construct an argument array for the process\n");
+        perror("Failed to construct an argument array for the process\n");
         exit(EXIT_FAILURE);
       }
 
@@ -48,18 +47,17 @@ int runProcess(ProcNode *n) {
 
       // restore stdout
       dup2(saved_stdout, STDOUT_FILENO);
-      fprintf(stderr, "Failed to execute the program\n");
+      perror("Failed to execute the program");
       exit(EXIT_FAILURE);
     } else {
       // we don't need a output file
       char **execl_argv = procNodeToArgv(n);
       if (execl_argv == NULL) {
-        fprintf(stderr,
-                "Failed to construct an argument array for the process\n");
+        perror("Failed to construct an argument array for the process\n");
         exit(EXIT_FAILURE);
       }
       execvp(execl_argv[0], execl_argv + 1);
-      fprintf(stderr, "Failed to execute the program\n");
+      perror("Failed to execute the program\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -82,7 +80,8 @@ char **procNodeToArgv(ProcNode *n) {
     if (strcmp(input, "blank-file.txt") == 0)
       input[0] = '\0';
     else {
-      fprintf(stderr, "Not avaliable input file %s\n", input);
+      printf("Not avaliable input file %s\n", input);
+      perror(NULL);
       return NULL;
     }
   } else
@@ -91,7 +90,8 @@ char **procNodeToArgv(ProcNode *n) {
   char **prog_argv;
   int numtokens;
   if ((numtokens = makeargv(prog, ARGV_DELIMITERS, &prog_argv)) == -1) {
-    fprintf(stderr, "Failed to construct an argument array for %s\n", prog);
+    printf("Failed to construct an argument array for %s\n", prog);
+    perror(NULL);
     return NULL;
   }
 
@@ -110,8 +110,8 @@ char **procNodeToArgv(ProcNode *n) {
 
   char **execl_argv;
   if ((numtokens = makeargv(proc_buffer, ARGV_DELIMITERS, &execl_argv)) == -1) {
-    fprintf(stderr, "Failed to construct an argument array for %s\n",
-            proc_buffer);
+    printf("Failed to construct an argument array for %s\n", proc_buffer);
+    perror(NULL);
     return NULL;
   }
   return execl_argv;

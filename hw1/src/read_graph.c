@@ -9,7 +9,8 @@ static const int buffer_size = 1024;
 
 int countLines(FILE *stream) {
   if (stream == NULL) {
-    fprintf(stderr, "Failed to open the file stream for counting the number of lines\n");
+    printf("Failed to open the file stream for counting the number of lines\n");
+    perror(NULL);
     return -1;
   }
 
@@ -27,7 +28,9 @@ int countLines(FILE *stream) {
 
 int convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node) {
   if (argv == NULL || proc_node == NULL) {
-    fprintf(stderr, "Failed to convert argv to Process Node, argv or proc_node is not allocated well\n");
+    printf(
+        "Failed to convert argv to Process Node, argv or proc_node is not allocated well\n");
+    perror(NULL);
     return -1;
   }
 
@@ -52,8 +55,8 @@ int convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node) {
     char **argv_for_children;
     if ((num_children =
              makeargv(argv[1], NUM_DELIMITERS, &argv_for_children)) == -1) {
-      fprintf(stderr, "Failed to construct an argument array for %s\n",
-              argv[1]);
+      printf("Failed to construct an argument array for %s\n", argv[1]);
+      perror(NULL);
       return -1;
     }
     proc_node->num_children = num_children;
@@ -71,18 +74,22 @@ int convert_argv_to_ProcNode(char **argv, int count, ProcNode *proc_node) {
 int convert_string_to_ProcNode(const char *str, int count,
                                ProcNode *proc_node) {
   if (str == NULL || proc_node == NULL) {
-    fprintf(stderr, "Failed to convert string to ProcNode, str or proc_node is not well allocated\n");
+    perror(
+            "Failed to convert string to ProcNode, str or proc_node is not "
+            "well allocated");
     return -1;
   }
 
   char **myargv;
   int numtokens;
   if ((numtokens = makeargv(str, DELIMITERS, &myargv)) == -1) {
-    fprintf(stderr, "Failed to construct an argument array for %s\n", str);
+    printf("Failed to construct an argument array for %s\n", str);
+    perror(NULL);
     return -1;
   }
   if (numtokens != 4) {
-    fprintf(stderr, "%s cannot be seperated into 4 parts\n", str);
+    printf("%s cannot be seperated into 4 parts\n", str);
+    perror(NULL);
     return -1;
   }
   if (convert_argv_to_ProcNode(myargv, count, proc_node) == -1) return -1;
@@ -92,7 +99,7 @@ int convert_string_to_ProcNode(const char *str, int count,
 
 int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   if (argc != 2) {
-    fprintf(stderr, "Usage: %s filepath\n", argv[0]);
+    printf("Usage: %s filepath\n", argv[0]);
     return -1;
   }
   FILE *stream;
@@ -102,6 +109,7 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   stream = fopen(argv[1], "r");
   if (stream == NULL) {
     printf("Cannot open file %s\n", argv[1]);
+    perror(NULL);
     return -1;
   }
 
@@ -111,7 +119,8 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   *proc_node_array = NULL;
   *proc_node_array = (ProcNode *)malloc(sizeof(ProcNode) * (num_lines));
   if (proc_node_array == NULL) {
-    fprintf(stderr, "Failed to construct process node array\n");
+    printf("Failed to construct process node array\n");
+    perror(NULL);
     return -1;
   }
 
@@ -123,7 +132,8 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
     // correct this part!!!, if there is empty line, the countLines() should
     // identify it.
     if (strcmp(line, "\n") == 0) continue;
-    if (convert_string_to_ProcNode(line, count, *proc_node_array + count) == -1) {
+    if (convert_string_to_ProcNode(line, count, *proc_node_array + count) ==
+        -1) {
       free(proc_node_array);
       return -1;
     }
