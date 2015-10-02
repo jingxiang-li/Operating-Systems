@@ -25,28 +25,43 @@ int runProcess(ProcNode *n) {
   }
   if (child_id == 0) {
     // this is the child, execute the process
-    int output_fd = open(n->output, O_WRONLY | O_CREAT | O_TRUNC, 0700);
-    if (output_fd < 0) {
-      fprintf(stderr, "Failed to create or write %s\n", n->output);
+    if (strcmp(n->output, "blank-out.txt") != 0) {
+      // we need a output file
+      int output_fd = open(n->output, O_WRONLY | O_CREAT | O_TRUNC, 0700);
+      if (output_fd < 0) {
+        fprintf(stderr, "Failed to create or write %s\n", n->output);
+        exit(EXIT_FAILURE);
+      }
+      char **execl_argv = procNodeToArgv(n);
+      if (execl_argv == NULL) {
+        fprintf(stderr,
+                "Failed to construct an argument array for the process\n");
+        exit(EXIT_FAILURE);
+      }
+
+      // save stdout
+      int saved_stdout = dup(STDOUT_FILENO);
+      dup2(output_fd, STDOUT_FILENO);
+      close(output_fd);
+      // printf("%s\n", execl_argv[0]);
+      execvp(execl_argv[0], execl_argv + 1);
+
+      // restore stdout
+      dup2(saved_stdout, STDOUT_FILENO);
+      fprintf(stderr, "Failed to execute the program\n");
+      exit(EXIT_FAILURE);
+    } else {
+      // we don't need a output file
+      char **execl_argv = procNodeToArgv(n);
+      if (execl_argv == NULL) {
+        fprintf(stderr,
+                "Failed to construct an argument array for the process\n");
+        exit(EXIT_FAILURE);
+      }
+      execvp(execl_argv[0], execl_argv + 1);
+      fprintf(stderr, "Failed to execute the program\n");
       exit(EXIT_FAILURE);
     }
-
-    char **execl_argv = procNodeToArgv(n);
-    if (execl_argv == NULL) {
-      fprintf(stderr,
-              "Failed to construct an argument array for the process\n");
-      exit(EXIT_FAILURE);
-    }
-
-    int saved_stdout = dup(STDOUT_FILENO);
-    dup2(output_fd, STDOUT_FILENO);
-    close(output_fd);
-    // printf("%s\n", execl_argv[0]);
-    execvp(execl_argv[0], execl_argv + 1);
-
-    dup2(saved_stdout, STDOUT_FILENO);
-    fprintf(stderr, "Failed to execute the program\n");
-    exit(EXIT_FAILURE);
   }
   // parent here
   int status;
@@ -70,8 +85,7 @@ char **procNodeToArgv(ProcNode *n) {
       fprintf(stderr, "Not avaliable input file %s\n", input);
       return NULL;
     }
-  }
-  else
+  } else
     fclose(stream);
 
   char **prog_argv;
