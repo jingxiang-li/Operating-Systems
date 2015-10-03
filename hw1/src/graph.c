@@ -19,6 +19,7 @@ Graph *createGraph(int num_nodes) {
   }
   for (int i = 0; i != num_nodes; i++) {
     graph->node_array[i].num_edges = 0;
+    graph->node_array[i].head = NULL;
   }
   return graph;
 }
@@ -71,24 +72,9 @@ void printGraph(Graph* graph) {
 }
 
 Graph *reverseGraph(Graph* graph) {
-  Graph *graph_rev = (Graph *)malloc(sizeof(Graph));
-    if (graph_rev == NULL) {
-    perror("Failed to reverse the graph, can't allocate memory for the Graph structure");
-    return NULL;
-  }
-  int num_nodes = graph->num_nodes;
-  graph_rev->num_nodes = num_nodes;
-  graph_rev->node_array = (AdjNode *)malloc(num_nodes * sizeof(AdjNode));
-  if (graph_rev->node_array == NULL) {
-    perror("Failed to allocate momory for the node_array inside the reverse graph structure");
-    return NULL;
-  }
-  for (int i = 0; i != num_nodes; i++) {
-    graph_rev->node_array[i].num_edges = 0;
-  }
-
+  Graph *graph_rev = createGraph(graph->num_nodes);
   AdjNode *node_array = graph->node_array;
-  for (int i = 0; i != num_nodes; i++) {
+  for (int i = 0; i != graph->num_nodes; i++) {
     AdjList *node = node_array[i].head;
     while (node != NULL) {
       addEdge(graph_rev, node->node_id, i);
