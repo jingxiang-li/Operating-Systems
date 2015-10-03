@@ -27,12 +27,12 @@ proc_utility.o: proc_utility.c proc_utility.h
 graph.o: graph.c graph.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-testGraph: graph.c test_graph.c
+testGraph: graph.o test_graph.c proc_utility.o makeargv.o
 	$(CC) -o $@ $^ $(CFLAGS)
 	./testGraph
 
 clean:
-	rm -f *.o *~ graphexec tsort* *.out *.txt
+	rm -f *.o *~ graphexec tsort* *.out *.txt testGraph
 	rm -rf ./output
 
 test:

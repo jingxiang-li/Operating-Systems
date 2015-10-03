@@ -4,6 +4,7 @@
 #include "makeargv.h"
 #include "proctype.h"
 #include "read_graph.h"
+#include "graph.h"
 
 static const int buffer_size = 1024;
 
@@ -142,4 +143,48 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   }
   fclose(stream);
   return num_lines;
+}
+
+int buildGraphs(ProcNode *proc_node_array, int num_proc, Graph **proc_graph,
+                Graph **dep_graph) {
+  if (proc_node_array == NULL) {
+    fprintf(stderr, "Failed to build proc_graph and dep_graph for the proc_node_array\n");
+    return -1;
+  }
+
+  *proc_graph = NULL;
+  *proc_graph = createGraph(num_proc);
+  if (*proc_graph == NULL)
+    return -1;
+  for (int i = 0; i != num_proc; i++) {
+    ProcNode proc_node = proc_node_array[i];
+    for (int j = 0; j != proc_node.num_children; j++) {
+      addEdge(*proc_graph, i, proc_node.children[j]);
+    }
+  }
+  *dep_graph = NULL;
+  *dep_graph = reverseGraph(*proc_graph);
+  if (*dep_graph == NULL)
+    return -1;
+  return 0;
+}
+
+int *makeForkArray(Graph *proc_graph) {
+  if (proc_graph == NULL) {
+    fprintf(stderr, "Failed to make fork array for the proc_graph, illigle access\n");
+    return NULL;
+  }
+  int num_proc = proc_graph->num_nodes;
+  int *fork_array = (int *)malloc(num_proc * sizeof(int));
+  if (fork_array == NULL) {
+    perror("Failed to make fork array, can't allocate memory");
+    return NULL;
+  }
+  for (int i = 0; i != num_proc; i++) {
+    if (proc_graph->node_array[i].head != NULL)
+      fork_array[i] = proc_graph->node_array[i].head->node_id;
+    else
+      fork_array[i] = -1;
+  }
+  return fork_array;
 }

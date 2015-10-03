@@ -9,6 +9,7 @@
 #include "read_graph.h"
 #include "checkcycle.h"
 #include "proc_utility.h"
+#include "graph.h"
 
 #define BUFFER_SIZE 1024
 
@@ -19,7 +20,7 @@ int main(int argc, char **argv) {
 
   // print the node array for debug
   // for (int i = 0; i < num_proc; i++) {
-  //   printProcNodeFormat(proc_node_array + i);
+  //   printProcNode(proc_node_array + i);
   //   if (runProcess(proc_node_array + i) == -1)
   //     continue;
   // }
@@ -56,17 +57,19 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  // try to run processes
-  for (int i = 0; i < num_proc; i++) {
-    // printProcNodeFormat(proc_node_array + topological_order[i]);
-    if (runProcess(proc_node_array + topological_order[i]) == -1) continue;
-  }
+  // build proc_graph and dep_graph for the proc_nodes
+  Graph *proc_graph, *dep_graph;
+  buildGraphs(proc_node_array, num_proc, &proc_graph, &dep_graph);
 
-  // make a temporary folder for holding the status files of processes
-  // struct stat st = {0};
-  // if (stat("./.tmp", &st) == -1)
-  //     mkdir("./.tmp", 0700);
+  // generate fork_array to dertmine who fork who
+  int *fork_array = makeForkArray(proc_graph);
 
+
+
+  // free resources and return
+  free(fork_array);
+  freeGraph(proc_graph);
+  freeGraph(dep_graph);
   free(proc_node_array);
   return 0;
 }
