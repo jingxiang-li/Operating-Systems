@@ -61,7 +61,9 @@ int main(int argc, char **argv) {
   Graph *proc_graph, *dep_graph;
   buildGraphs(proc_node_array, num_proc, &proc_graph, &dep_graph);
 
-  // generate fork_array to dertmine who fork who
+  // generate fork_array to dertmine the fork dependency
+  // proc i should be forked by fork_array[i]
+  // if fork_array[i] == -1, then this proc should be forked by the main process at the very begining
   int *fork_array = makeForkArray(proc_graph);
 
 
