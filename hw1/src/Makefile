@@ -39,7 +39,7 @@ testGraphRun: test_graph_run.c graph_run.o proctype.o proc_utility.o graph.o mak
 	./testGraphRun
 
 clean:
-	rm -f *.o *~ graphexec tsort* *.out *.txt testGraph
+	rm -f *.o *~ graphexec tsort* *.out *.txt testGraph testGraphRun
 	rm -rf ./output
 
 test:

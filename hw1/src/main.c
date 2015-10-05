@@ -64,12 +64,12 @@ int main(int argc, char **argv) {
 
   // generate fork_array to dertmine the fork dependency
   // proc i should be forked by fork_array[i]
-  // if fork_array[i] == -1, then this proc should be forked by the main process at the very begining
+  // if fork_array[i] == -1, then this proc should be forked by the main process
+  // at the very begining
   int *fork_array = makeForkArray(proc_graph);
 
+  // run Graph file
   runGraph(proc_node_array, dep_graph, fork_array, num_proc);
-
-
 
   // free resources and return
   free(fork_array);

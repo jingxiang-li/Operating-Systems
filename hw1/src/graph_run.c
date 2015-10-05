@@ -29,13 +29,11 @@ int runGraph(ProcNode *proc_node_array, Graph *dep_graph, int *fork_array,
     }
     child_pids[num_forks++] = childid;
   }
-
   // wait for all children forked by this process
   if (wait_children(child_pids, num_forks) == -1) {
     free(child_pids);
     return -1;
   }
-
   // everything is fine
   free(child_pids);
   return 0;
@@ -72,6 +70,7 @@ pid_t forkAndRun(int proc_id, ProcNode *proc_node_array, int *fork_array,
       exit(EXIT_FAILURE);
     if (markProcSuccess(proc_id) == -1)
       exit(EXIT_FAILURE);
+    printf("Complete Process %d\n", proc_id);
     exit(EXIT_SUCCESS);
   }
   return childid;
@@ -129,6 +128,6 @@ int markProcSuccess(int proc_id) {
     printf("Failed to mark process %d is succcess", proc_id);
     perror(NULL);
     return -1;
-  } else
-    return 0;
+  }
+  return 0;
 }
