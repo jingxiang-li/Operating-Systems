@@ -34,6 +34,10 @@ testGraph: graph.o test_graph.c proc_utility.o makeargv.o
 	$(CC) -o $@ $^ $(CFLAGS)
 	./testGraph
 
+testGraphRun: test_graph_run.c graph_run.o proctype.o proc_utility.o graph.o makeargv.o
+	$(CC) -o $@ $^ $(CFLAGS)
+	./testGraphRun
+
 clean:
 	rm -f *.o *~ graphexec tsort* *.out *.txt testGraph
 	rm -rf ./output
