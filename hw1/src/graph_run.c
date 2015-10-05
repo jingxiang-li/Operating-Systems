@@ -10,25 +10,28 @@
 #include "graph.h"
 #include "graph_run.h"
 
-int runGraph(ProcNode *proc_node_array, Graph *proc_graph, Graph *dep_graph,
-             int *fork_array, int num_proc) {
+int runGraph(ProcNode *proc_node_array, Graph *dep_graph, int *fork_array,
+             int num_proc) {
   // fork children and run processes
   pid_t childid;
-  int *child_pids = (int *)malloc(sizeof(int) * num_proc);
+  pid_t *child_pids = (pid_t *)malloc(sizeof(pid_t) * num_proc);
   int num_forks = 0;
   for (int i = 0; i != num_proc; i++) {
-    if (fork_array[i] == -1) childid = fork();
+    // if fork_array[i] == -1, then this process should be executed by the main process
+    if (fork_array[i] != -1) continue;
+
+    childid = fork();
     if (childid == -1) {
       // error handling
       fprintf(stderr, "Can't fork child for process %d", i);
       perror(NULL);
     }
     if (childid == 0) {
-      // child comes here, run process
+      // child comes here, run process, exit after execution
       if (runGraphProc(proc_node_array, i, dep_graph, fork_array, num_proc) ==
           -1)
         exit(EXIT_FAILURE);
-      break;
+      exit(EXIT_SUCCESS);
     } else {
       // parent record the pid of child
       child_pids[num_forks++] = childid;
@@ -38,10 +41,9 @@ int runGraph(ProcNode *proc_node_array, Graph *proc_graph, Graph *dep_graph,
   // wait for all children forked by this process
   int status;
   for (int i = 0; i != num_forks; i++) {
-    while (waitpid(child_pids[i], &status, 0) == -1)
-      ;
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-      printf("Failed to execute excute process %d\n", child_pids[i]);
+    waitpid(child_pids[i], &status, 0);
+    if (!WIFEXITED(status)) {
+      printf("Failed to execute process %d\n", child_pids[i]);
       perror(NULL);
       free(child_pids);
       return -1;
@@ -53,6 +55,12 @@ int runGraph(ProcNode *proc_node_array, Graph *proc_graph, Graph *dep_graph,
   return 0;
 }
 
+int runGraphProc(ProcNode *proc_node_array, int proc_id, Graph *dep_graph,
+                 int *fork_array, int num_proc) {
+  printf("%d\n", proc_id);
+  return 0;
+}
+/*
 int runGraphProc(ProcNode *proc_node_array, int proc_id, Graph *dep_graph,
                  int *fork_array, int num_proc) {
   ProcNode *proc_node = proc_node_array + proc_id;
@@ -172,3 +180,4 @@ int markProcSuccess(int proc_id) {
   } else
     return -1;
 }
+*/

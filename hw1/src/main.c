@@ -10,6 +10,7 @@
 #include "checkcycle.h"
 #include "proc_utility.h"
 #include "graph.h"
+#include "graph_run.h"
 
 #define BUFFER_SIZE 1024
 
@@ -65,6 +66,8 @@ int main(int argc, char **argv) {
   // proc i should be forked by fork_array[i]
   // if fork_array[i] == -1, then this proc should be forked by the main process at the very begining
   int *fork_array = makeForkArray(proc_graph);
+
+  runGraph(proc_node_array, dep_graph, fork_array, num_proc);
 
 
 

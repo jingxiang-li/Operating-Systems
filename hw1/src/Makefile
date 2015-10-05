@@ -3,7 +3,7 @@ CFLAGS=-g -Wall -fstack-protector -Wextra -Wunreachable-code -O1 -std=c99
 
 all: graphexec
 
-graphexec: main.o read_graph.o proctype.o makeargv.o checkcycle.o proc_utility.o graph.o
+graphexec: main.o read_graph.o proctype.o makeargv.o checkcycle.o proc_utility.o graph.o graph_run.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 main.o: main.c
@@ -25,6 +25,9 @@ proc_utility.o: proc_utility.c proc_utility.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 graph.o: graph.c graph.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+graph_run.o: graph_run.c graph_run.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 testGraph: graph.o test_graph.c proc_utility.o makeargv.o

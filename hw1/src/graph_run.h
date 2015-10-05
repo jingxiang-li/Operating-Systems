@@ -7,7 +7,7 @@
 #define PATH_LENGTH 256
 #define TMP_FOLDER "/tmp/csci4061JingxiangLi"
 
-int runGraph(ProcNode *proc_node_array, Graph *proc_graph, Graph *dep_graph,
+int runGraph(ProcNode *proc_node_array, Graph *dep_graph,
              int *fork_array, int num_proc);
 
 int runGraphProc(ProcNode *proc_node_array, int proc_id, Graph *dep_graph,
