@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Wall -fstack-protector -Wextra -Wunreachable-code -O1 -std=c99
+CFLAGS=-Wall -fstack-protector -Wextra -Wunreachable-code -O2 -std=c99
 
 all: graphexec
 
