@@ -10,7 +10,7 @@
 #include "checkcycle.h"
 #include "proc_utility.h"
 #include "graph.h"
-#include "graph_run.h"
+#include "run_graph.h"
 
 #define BUFFER_SIZE 1024
 
@@ -19,15 +19,8 @@ int main(int argc, char **argv) {
   ProcNode *proc_node_array;
   int num_proc = read_graph_file(argc, argv, &proc_node_array);
 
-  // print the node array for debug
-  // for (int i = 0; i < num_proc; i++) {
-  //   printProcNode(proc_node_array + i);
-  //   if (runProcess(proc_node_array + i) == -1)
-  //     continue;
-  // }
-
   // change working dir to ./output
-  struct stat wd_st = {0};
+  struct stat wd_st;
   if (stat("./output", &wd_st) == -1) {
     mkdir("./output", 0700);
   }
@@ -53,7 +46,8 @@ int main(int argc, char **argv) {
   // check if the process graph has an cycle
   int *topological_order;
   if (checkCycleFancy(proc_node_array, num_proc, &topological_order) != 0) {
-    // have cycle or some error happens
+    // have cycle
+    printf("Find Cycles\n");
     free(proc_node_array);
     return 0;
   }

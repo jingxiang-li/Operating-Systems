@@ -27,14 +27,15 @@ int runProcess(ProcNode *n) {
     // this is the child, execute the process
     if (strcmp(n->output, "blank-out.txt") != 0) {
       // we need a output file
+      char **execl_argv = procNodeToArgv(n);
+      if (*execl_argv == NULL) {
+        perror("Failed to construct an argument array for the process\n");
+        exit(EXIT_FAILURE);
+      }
+
       int output_fd = open(n->output, O_WRONLY | O_CREAT | O_TRUNC, 0700);
       if (output_fd < 0) {
         perror("Failed to create or write output file");
-        exit(EXIT_FAILURE);
-      }
-      char **execl_argv = procNodeToArgv(n);
-      if (execl_argv == NULL) {
-        perror("Failed to construct an argument array for the process\n");
         exit(EXIT_FAILURE);
       }
 
@@ -42,7 +43,8 @@ int runProcess(ProcNode *n) {
       int saved_stdout = dup(STDOUT_FILENO);
       dup2(output_fd, STDOUT_FILENO);
       close(output_fd);
-      // printf("%s\n", execl_argv[0]);
+
+      // execute process
       execvp(execl_argv[0], execl_argv + 1);
 
       // restore stdout
@@ -52,7 +54,7 @@ int runProcess(ProcNode *n) {
     } else {
       // we don't need a output file
       char **execl_argv = procNodeToArgv(n);
-      if (execl_argv == NULL) {
+      if (*execl_argv == NULL) {
         perror("Failed to construct an argument array for the process\n");
         exit(EXIT_FAILURE);
       }
@@ -64,7 +66,9 @@ int runProcess(ProcNode *n) {
   // parent here
   int status;
   wait(&status);
-  if (!WIFEXITED(status)) return -1;
+  if (!WIFEXITED(status)) {
+    return -1;
+  }
   return 0;
 }
 

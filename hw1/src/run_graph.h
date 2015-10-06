@@ -1,5 +1,5 @@
-#ifndef GRAPH_RUN_H
-#define GRAPH_RUN_H
+#ifndef RUN_GRAPH_H
+#define RUN_GRAPH_H
 
 #include "proctype.h"
 #include "proc_utility.h"
@@ -56,7 +56,7 @@ int fileExist(char *filename);
 /**
  * Check if process completes successfully
  * @proc_id: id of process
- * @return: 1 if the process completes successfully; 0 otherwise.
+ * @return: 1 if succeed; -1 if failed; 0 if running or something fancy happens.
  */
 int ProcSuccess(int proc_id);
 
@@ -66,5 +66,12 @@ int ProcSuccess(int proc_id);
  * @return: 0 on no error; otherwise -1.
  */
 int markProcSuccess(int proc_id);
+
+/**
+ * Mark that the process failed
+ * @proc_id: id of process
+ * @return: 0 on no error; otherwise -1.
+ */
+int markProcFailure(int proc_id);
 
 #endif
