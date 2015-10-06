@@ -1,3 +1,6 @@
+/**
+ * makeargv modified from Robbins & Robbins book
+ */
 #ifndef MAKE_ARGV_H
 #define MAKE_ARGV_H
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "graph_run.h"
+#include "run_graph.h"
 
 int main() {
   int id = 1;

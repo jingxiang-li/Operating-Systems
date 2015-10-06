@@ -148,14 +148,15 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
 int buildGraphs(ProcNode *proc_node_array, int num_proc, Graph **proc_graph,
                 Graph **dep_graph) {
   if (proc_node_array == NULL) {
-    fprintf(stderr, "Failed to build proc_graph and dep_graph for the proc_node_array\n");
+    fprintf(
+        stderr,
+        "Failed to build proc_graph and dep_graph for the proc_node_array\n");
     return -1;
   }
 
   *proc_graph = NULL;
   *proc_graph = createGraph(num_proc);
-  if (*proc_graph == NULL)
-    return -1;
+  if (*proc_graph == NULL) return -1;
   for (int i = 0; i != num_proc; i++) {
     ProcNode proc_node = proc_node_array[i];
     for (int j = 0; j != proc_node.num_children; j++) {
@@ -164,14 +165,14 @@ int buildGraphs(ProcNode *proc_node_array, int num_proc, Graph **proc_graph,
   }
   *dep_graph = NULL;
   *dep_graph = reverseGraph(*proc_graph);
-  if (*dep_graph == NULL)
-    return -1;
+  if (*dep_graph == NULL) return -1;
   return 0;
 }
 
 int *makeForkArray(Graph *proc_graph) {
   if (proc_graph == NULL) {
-    fprintf(stderr, "Failed to make fork array for the proc_graph, illigle access\n");
+    fprintf(stderr,
+            "Failed to make fork array for the proc_graph, illigle access\n");
     return NULL;
   }
   int num_proc = proc_graph->num_nodes;

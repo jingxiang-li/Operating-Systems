@@ -14,7 +14,9 @@ Graph *createGraph(int num_nodes) {
   graph->num_nodes = num_nodes;
   graph->node_array = (AdjNode *)malloc(num_nodes * sizeof(AdjNode));
   if (graph->node_array == NULL) {
-    perror("Failed to allocate momory for the node_array inside the graph structure");
+    perror(
+        "Failed to allocate momory for the node_array inside the graph "
+        "structure");
     return NULL;
   }
   for (int i = 0; i != num_nodes; i++) {
@@ -38,16 +40,20 @@ void freeGraph(Graph *graph) {
   free(graph);
 }
 
-int addEdge(Graph* graph, int src, int dest) {
+int addEdge(Graph *graph, int src, int dest) {
   int num_nodes = graph->num_nodes;
   if (src < 0 || dest < 0 || src >= num_nodes || dest >= num_nodes) {
-    fprintf(stderr, "Failed to add edge (%d, %d) into the graph, index out of bounds\n", src, dest);
-      return -1;
+    fprintf(stderr,
+            "Failed to add edge (%d, %d) into the graph, index out of bounds\n",
+            src, dest);
+    return -1;
   }
   AdjNode *node_array = graph->node_array;
   AdjList *new_node = (AdjList *)malloc(sizeof(AdjList));
   if (new_node == NULL) {
-    perror("Failed to add edge (%d, %d) into the graph, can't allocate memory for the new edge\b");
+    perror(
+        "Failed to add edge (%d, %d) into the graph, can't allocate memory for "
+        "the new edge\b");
     return -1;
   }
   new_node->node_id = dest;
@@ -57,7 +63,7 @@ int addEdge(Graph* graph, int src, int dest) {
   return 0;
 }
 
-void printGraph(Graph* graph) {
+void printGraph(Graph *graph) {
   int num_nodes = graph->num_nodes;
   AdjNode *node_array = graph->node_array;
   for (int i = 0; i != num_nodes; i++) {
@@ -71,7 +77,7 @@ void printGraph(Graph* graph) {
   }
 }
 
-Graph *reverseGraph(Graph* graph) {
+Graph *reverseGraph(Graph *graph) {
   Graph *graph_rev = createGraph(graph->num_nodes);
   AdjNode *node_array = graph->node_array;
   for (int i = 0; i != graph->num_nodes; i++) {
@@ -83,5 +89,3 @@ Graph *reverseGraph(Graph* graph) {
   }
   return graph_rev;
 }
-
-

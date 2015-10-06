@@ -12,8 +12,9 @@
 
 int runGraph(ProcNode *proc_node_array, Graph *dep_graph, int *fork_array,
              int num_proc) {
-  system("rm -rf /tmp/csci4061JingxiangLi");
-  system("mkdir -p /tmp/csci4061JingxiangLi");
+  // make temporary folder
+  if (makeTmpFolder() == -1)
+    return -1;
   // fork children and run processes
   pid_t childid;
   pid_t *child_pids = (pid_t *)malloc(sizeof(pid_t) * num_proc);
@@ -110,8 +111,10 @@ int wait_all(int proc_id, Graph *dep_graph) {
     dep = deps.head;
     while (dep != NULL) {
       int dep_id = dep->node_id;
-      if (ProcSuccess(dep_id) == 1) num_finished++;
-      else if (ProcSuccess(dep_id) == -1) return -1;
+      if (ProcSuccess(dep_id) == 1)
+        num_finished++;
+      else if (ProcSuccess(dep_id) == -1)
+        return -1;
       dep = dep->next;
     }
     if (num_finished == deps.num_edges) break;
@@ -159,6 +162,21 @@ int markProcFailure(int proc_id) {
   if (ProcSuccess(proc_id) != -1) {
     printf("Failed to mark process %d is failed", proc_id);
     perror(NULL);
+    return -1;
+  }
+  return 0;
+}
+
+int makeTmpFolder() {
+  char tmp_dir_prog[PATH_LENGTH];
+  sprintf(tmp_dir_prog, "rm -rf %s", TMP_FOLDER);
+  if (-1 == system(tmp_dir_prog)) {
+    perror("Failed to rm previous temporary folder");
+    return -1;
+  }
+  sprintf(tmp_dir_prog, "mkdir -p %s", TMP_FOLDER);
+  if (-1 == system(tmp_dir_prog)) {
+    perror("Failed to make temporary folder");
     return -1;
   }
   return 0;
