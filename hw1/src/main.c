@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <libgen.h>
 #include "read_graph.h"
 #include "checkcycle.h"
 #include "proc_utility.h"
@@ -13,24 +14,28 @@
 #include "run_graph.h"
 
 #define BUFFER_SIZE 1024
-#define OUTPUT_DIR "../output"
+#define OUTPUT_DIR "./output"
 
-static int makeOutputDir();
+static int makeOutputDir(char *path);
 
 int main(int argc, char **argv) {
-  // change working dir to OUTPUT_DIR
-  if (makeOutputDir() == -1)
-    return 0;
-
   // read process file as a node array
   ProcNode *proc_node_array;
   int num_proc = read_graph_file(argc, argv, &proc_node_array);
+  if (num_proc == -1)
+    return 0;
+
+  // change working dir to OUTPUT_DIR
+  if (makeOutputDir(argv[1]) == -1)
+    return 0;
 
   // check if the process graph has an cycle
-  int *topological_order;
-  if (checkCycleFancy(proc_node_array, num_proc, &topological_order) != 0) {
-    // have cycle
+  int have_cycle = checkCycle(proc_node_array, num_proc);
+  if (have_cycle == 1) {
     printf("Find Cycles\n");
+    free(proc_node_array);
+    return 0;
+  } else if (have_cycle == -1) {
     free(proc_node_array);
     return 0;
   }
@@ -60,7 +65,7 @@ int main(int argc, char **argv) {
  * make and change output directory using const string OUTPUT_DIR
  * @return 0 on success; -1 otherwise
  */
-static int makeOutputDir() {
+static int makeOutputDir(char *path) {
   // make a OUTPUT_DIR
   struct stat wd_st;
   if (stat(OUTPUT_DIR, &wd_st) == -1) {
@@ -71,16 +76,36 @@ static int makeOutputDir() {
     perror(NULL);
     return -1;
   }
-  // change the OUTPUT_DIR
-  char cur_wd[BUFFER_SIZE];
-  if (getcwd(cur_wd, BUFFER_SIZE) == NULL) {
-    perror("can't read currect working directory");
+
+  char *file_name = basename(path);
+  if (file_name == NULL) {
+    perror("can't read name of the graph file");
     return -1;
   }
-  char new_wd[BUFFER_SIZE];
-  sprintf(new_wd, "%s/%s", cur_wd, OUTPUT_DIR);
-  if (chdir(new_wd) == -1) {
-    fprintf(stderr, "can't change working directory to %s\n", new_wd);
+  // remove char's after '.' sign in the filename
+  int length_file_name = strlen(file_name);
+  for (int i = 0; i != length_file_name; i++)
+    if (file_name[i] == '.') {
+      file_name[i] = '\0';
+      break;
+    }
+
+  // make output dir like OUTPUT_DIR/file_name
+  char output_dir[BUFFER_SIZE];
+  sprintf(output_dir, "%s/%s", OUTPUT_DIR, file_name);
+
+  if (stat(output_dir, &wd_st) == -1) {
+    mkdir(output_dir, 0700);
+  }
+  if (stat(output_dir, &wd_st) == -1) {
+    fprintf(stderr, "can't make output directory %s\n", output_dir);
+    perror(NULL);
+    return -1;
+  }
+
+  // change output dir
+  if (chdir(output_dir) == -1) {
+    fprintf(stderr, "can't change working directory to %s\n", output_dir);
     perror(NULL);
     return -1;
   }

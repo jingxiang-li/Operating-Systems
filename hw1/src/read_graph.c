@@ -101,14 +101,21 @@ int convert_string_to_ProcNode(const char *str, int count,
 
 int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   if (argc != 2) {
-    printf("Usage: %s filepath\n", argv[0]);
+    printf("Usage: %s path/to/file\n", argv[0]);
     return -1;
   }
+
+  char real_path[4096];
+  if (NULL == realpath(argv[1], real_path)) {
+    fprintf(stderr, "Failed to find the absolute path of %s;", argv[1]);
+    perror(NULL);
+    return -1;
+  }
+
   FILE *stream;
   char line[buffer_size];
   size_t len = buffer_size;
-
-  stream = fopen(argv[1], "r");
+  stream = fopen(real_path, "r");
   if (stream == NULL) {
     printf("Cannot open file %s\n", argv[1]);
     perror(NULL);
