@@ -20,14 +20,22 @@
  * data structure for holding information of a process
  */
 typedef struct {
-  int id;                       // corresponds to line number in graph text file
-  char prog[MAX_ARG_LENGTH];    // prog + arguments
-  char input[MAX_ARG_LENGTH];   // filename
-  char output[MAX_ARG_LENGTH];  // filename
-  int children[MAX_NUM_CHILDREN];  // children IDs
-  int num_children;                // how many children this node has
+  // line number in the graph file is the id
+  int id;
+  // prog + arguments
+  char prog[MAX_ARG_LENGTH];
+  // input filename
+  char input[MAX_ARG_LENGTH];
+  // input filename
+  char output[MAX_ARG_LENGTH];
+  // children IDs, only used in building graph
+  int children[MAX_NUM_CHILDREN];
+  // number of children, only used in building graph
+  int num_children;
+  // status of this process, useless
   int status;
-  pid_t pid;  // track it when it's running
+  // pid of this process, useless
+  pid_t pid;
 } ProcNode;
 
 /**

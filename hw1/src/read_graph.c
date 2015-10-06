@@ -7,6 +7,7 @@
 #include "graph.h"
 
 static const int buffer_size = 1024;
+static const int absolute_path_size = 4096;
 
 int countLines(FILE *stream) {
   if (stream == NULL) {
@@ -105,7 +106,7 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
     return -1;
   }
 
-  char real_path[4096];
+  char real_path[absolute_path_size];
   if (NULL == realpath(argv[1], real_path)) {
     fprintf(stderr, "Failed to find the absolute path of %s;", argv[1]);
     perror(NULL);

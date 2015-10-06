@@ -10,11 +10,11 @@ INCLUDES = $(wildcard $(SRCDIR)/*.h)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
-	@$(CC) -o $@ $(OBJECTS) $(CFLAGS)
+	$(CC) -o $@ $(OBJECTS) $(CFLAGS)
 	@echo "Building complete!"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
-	@$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 .PHONEY: clean
 clean:
