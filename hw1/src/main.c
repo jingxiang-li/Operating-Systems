@@ -13,35 +13,18 @@
 #include "run_graph.h"
 
 #define BUFFER_SIZE 1024
+#define OUTPUT_DIR "../output"
+
+static int makeOutputDir();
 
 int main(int argc, char **argv) {
+  // change working dir to OUTPUT_DIR
+  if (makeOutputDir() == -1)
+    return 0;
+
   // read process file as a node array
   ProcNode *proc_node_array;
   int num_proc = read_graph_file(argc, argv, &proc_node_array);
-
-  // change working dir to ./output
-  struct stat wd_st;
-  if (stat("./output", &wd_st) == -1) {
-    mkdir("./output", 0700);
-  }
-  if (stat("./output", &wd_st) == -1) {
-    perror("can't make output directory ./output");
-    return -1;
-  }
-
-  char wd_buf[BUFFER_SIZE];
-  if (getcwd(wd_buf, BUFFER_SIZE) == NULL) {
-    perror("can't read currect working directory");
-    return -1;
-  }
-  if (strcat(wd_buf, "/output") == NULL) {
-    perror("can't construct new working directory ./output");
-    return -1;
-  }
-  if (chdir(wd_buf) == -1) {
-    perror("can't change working directory to ./output");
-    return -1;
-  }
 
   // check if the process graph has an cycle
   int *topological_order;
@@ -70,5 +53,36 @@ int main(int argc, char **argv) {
   freeGraph(proc_graph);
   freeGraph(dep_graph);
   free(proc_node_array);
+  return 0;
+}
+
+/**
+ * make and change output directory using const string OUTPUT_DIR
+ * @return 0 on success; -1 otherwise
+ */
+static int makeOutputDir() {
+  // make a OUTPUT_DIR
+  struct stat wd_st;
+  if (stat(OUTPUT_DIR, &wd_st) == -1) {
+    mkdir(OUTPUT_DIR, 0700);
+  }
+  if (stat(OUTPUT_DIR, &wd_st) == -1) {
+    fprintf(stderr, "can't make output directory %s\n", OUTPUT_DIR);
+    perror(NULL);
+    return -1;
+  }
+  // change the OUTPUT_DIR
+  char cur_wd[BUFFER_SIZE];
+  if (getcwd(cur_wd, BUFFER_SIZE) == NULL) {
+    perror("can't read currect working directory");
+    return -1;
+  }
+  char new_wd[BUFFER_SIZE];
+  sprintf(new_wd, "%s/%s", cur_wd, OUTPUT_DIR);
+  if (chdir(new_wd) == -1) {
+    fprintf(stderr, "can't change working directory to %s\n", new_wd);
+    perror(NULL);
+    return -1;
+  }
   return 0;
 }
