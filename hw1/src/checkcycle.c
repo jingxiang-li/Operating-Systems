@@ -11,17 +11,17 @@
 
 int checkCycle(ProcNode *proc_node_array, int num_proc) {
   int i, j;
-
   if (proc_node_array == NULL) {
     perror("Failed to check cycle in the graph");
     return -1;
   }
+
+  // write tsort input file
   FILE *tsort_input = fopen("tsort_input.txt", "w");
   if (tsort_input == NULL) {
     perror("Failed to create tsort_input.txt");
     return -1;
   }
-
   int num_edges = 0;
   for (i = 0; i != num_proc; i++) {
     if (proc_node_array[i].num_children == 0) continue;
@@ -31,14 +31,14 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
     }
   }
   fclose(tsort_input);
-  if (num_edges == 0)  // no cycle
-    return 0;
 
-  int tsort_output_fd =
-      open("./tsort_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-  if (tsort_output_fd < 0) {
-    perror("Error opening tsort_output.txt");
-    return -1;
+  // No edge no cycle
+  if (num_edges == 0) {
+    if (remove("./tsort_input.txt") == -1) {
+      perror("Unable to delete ./tsort_input.txt");
+      return -1;
+    }
+    return 0;
   }
 
   pid_t child_id;
@@ -49,6 +49,13 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
   }
   if (child_id == 0) {
     // this is child, execute tsort here
+    int tsort_output_fd =
+        open("./tsort_output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (tsort_output_fd < 0) {
+      perror("Error opening tsort_output.txt");
+      exit(EXIT_FAILURE);
+    }
+
     // save and redirect stdout and stderr
     int saved_stdout, saved_stderr;
     saved_stdout = dup(STDOUT_FILENO);
@@ -56,6 +63,7 @@ int checkCycle(ProcNode *proc_node_array, int num_proc) {
     dup2(tsort_output_fd, STDOUT_FILENO);
     dup2(tsort_output_fd, STDERR_FILENO);
     close(tsort_output_fd);
+
     // execute tsort
     execlp("tsort", "tsort", "./tsort_input.txt", (char *)NULL);
 
