@@ -33,3 +33,4 @@
 
 #compression file
 *.tar
+*.tar.gz

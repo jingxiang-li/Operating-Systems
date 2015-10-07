@@ -22,12 +22,10 @@ int main(int argc, char **argv) {
   // read process file as a node array
   ProcNode *proc_node_array;
   int num_proc = read_graph_file(argc, argv, &proc_node_array);
-  if (num_proc == -1)
-    return 0;
+  if (num_proc == -1) return 0;
 
   // change working dir to OUTPUT_DIR
-  if (makeOutputDir(argv[1]) == -1)
-    return 0;
+  if (makeOutputDir(argv[1]) == -1) return 0;
 
   // check if the process graph has an cycle
   int have_cycle = checkCycle(proc_node_array, num_proc);
