@@ -124,7 +124,11 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   }
 
   int num_lines = countLines(stream);
-  if (num_lines < 1) return -1;
+  if (num_lines == 0) {
+    fprintf(stderr, "Empty Graph file %s\n", argv[1]);
+    return -1;
+  }
+  if (num_lines < 0) return -1;
 
   *proc_node_array = NULL;
   *proc_node_array = (ProcNode *)malloc(sizeof(ProcNode) * (num_lines));
