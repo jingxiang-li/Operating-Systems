@@ -27,7 +27,7 @@ clean:
 
 .PHONEY: remove
 remove: clean
-	@rm -rf $(BINDIR)/$(TARGET)
+	@rm -rf $(OBJDIR) $(BINDIR)
 	@echo "Executable removed!"
 
 .PHONEY: test

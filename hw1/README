@@ -12,7 +12,7 @@ Overview
 Compiling and Running
 ==========================
 - To compile it, use: "make all", then "graphexec" can be found in ./bin
-- To run "graphexec" with graph file, go to "./bin", use command "./graphexec /path/to/graph/file.txt", and the output can be found in "output" in the current directory
+- To run "graphexec" with graph file, go to "./bin", use command "./graphexec /path/to/graph/file.txt", output files can be found in a new directory "output" in the current directory
 - To run tests, use: "make test"
 - To remove object files and test outputs, use: "make clean"
 - To remove everything other than source files, use: "make remove"
