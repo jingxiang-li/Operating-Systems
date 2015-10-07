@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -fstack-protector -Wextra -Wunreachable-code -O3 -std=c99
+CFLAGS = -Wall -fstack-protector -Wextra -Wunreachable-code -O3 -std=c99 -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
 TARGET = graphexec
 SRCDIR = src
 OBJDIR = obj
@@ -9,11 +9,15 @@ SOURCES = $(wildcard $(SRCDIR)/*.c)
 INCLUDES = $(wildcard $(SRCDIR)/*.h)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
+all: $(BINDIR)/$(TARGET)
+
 $(BINDIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(@D)
 	$(CC) -o $@ $(OBJECTS) $(CFLAGS)
 	@echo "Building complete!"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	@mkdir -p $(@D)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 .PHONEY: clean
