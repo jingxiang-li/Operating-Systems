@@ -1,3 +1,8 @@
+/*login: lixx3899, wang3518
+* date: 10/06/2015
+* name: Jingxiang Li, Yuchen Wang
+* id: 5095269, 4644045 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

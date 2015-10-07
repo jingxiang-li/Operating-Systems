@@ -1,0 +1,42 @@
+/*login: lixx3899, wang3518
+* date: 10/06/2015
+* name: Jingxiang Li, Yuchen Wang
+* id: 5095269, 4644045 */
+
+==========================
+Overview
+==========================
+- This is a "graphexec" program in C that will execute a graph of user programs in parallel using fork, exec and wait in a controlled fashion.
+
+==========================
+Compiling and Running
+==========================
+- To compile it, use: "make all", then "graphexec" can be found in ./bin
+- To run "graphexec" with graph file, go to "./bin", use command "./graphexec /path/to/graph/file.txt", and the output can be found in "output" in the current directory
+- To run tests, use: "make test"
+- To remove object files and test outputs, use: "make clean"
+- To remove everything other than source files, use: "make remove"
+
+==========================
+Implementation
+==========================
+- "graphexec" asks for only one argument, that is the path to the graph file.
+- "graphexec" will first read the graph file, parse it to an array of ProcNodes defined in proctype.h.
+- Then, "graphexec will check if the graph has a cycle, based on the shell command "tsort". "tsort" is a shell command aimed to derive the topological order of a graph. If there is no cycle in the graph, the tsort will print the topological order, otherwise it will throw error messages to stderr. In this way, we can easily detect a cycle by executing "tsort" and checking the output of stderr. If a cycle is found in the graph, "graphexec" will print message saying "Find Cycle!" and immediately return.
+- If there is no cycle in the graph, "graphexec" will generate two important data structures from the array of ProcNodes: dep_graph and fork_array. dep_graph is a Graph object (defined in graph.h) for storing the dependency information of processes. fork_array is an array of process ids specifying the fork dependency among processes, that is for process #i, determine which process should fork it. The rule for making fork_array is that fork_array[i] can be any child of i. If process i doesn't have child, then set fork_array[i] = -1. In this way, if fork_array[i] > -1, then process i should be forked by fork_array[i]; if fork_array[i] == -1, then process i should be forked by the main process.
+- After that, "graphexec" will run the graph processes. The key point for running the graph is the function "forkAndRun". "forkAndRun" asks for the process id to be executed. It will first fork a child for the process, call "forkAndRun" on processes that should be forked by it, wait for its dependencies, execute itself, mark that it completes successfully and exit. The pseudo code for "forkAndRun" is like this:
+    forkAndRun(process_id)
+        fork();
+        if child
+            for i: fork_array[i] == process_id
+                forkAndRun(i)
+            wait_all_dependencies(process_id)
+            execute(process_id);
+            mark_success(process_id);
+            exit()
+       if parent
+         wait()
+         return
+- By recursively calling forkAndRun, we can process the graph in a bottom-up way. That is to let bottom processes fork and wait top processes, then execute bottom processes. This is very similar to DFS.
+- To keep track of the status of processes, we use "file indicators". That is, if process #i completes successfully, it will create a file named "[i]" in the temporary folder; if it fails to execute, it will create a file named "[i]f" in the temporary folder. By this means it's easy to check status of any processes. For example, if process 0 should wait for process 1, it will check files in the temporary folder. if there is a file named "1", then process 0 knows that process 1 completes successfully and it can execute itself; if there is a file named "1f", then 0 knows that there is something bad happens in process 1, it should terminates itself; if there is no such file, 0 knows that it should continue waiting since process 1 is running.
+- By combining forkAndRun function and the "file indicators", we should be able to process the graph file successfully.

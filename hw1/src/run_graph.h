@@ -12,10 +12,16 @@
  * whole procedure can be done recursively, the pseudo code for the process is
  *
  * forkAndRun(process_id) {
- *   for i: fork_array[i] == process_id
- *     forkAndRun(i)
- *   wait_all_dependencies(process_id)
- *   execute(process_id);
+ *   fork();
+ *   if (child)
+ *     for i: fork_array[i] == process_id
+ *       forkAndRun(i)
+ *     wait_all_dependencies(process_id)
+ *     execute(process_id);
+ *     exit()
+ *   if (parent)
+ *     wait()
+ *     return
  * }
  *
  * Note that if fork_array[i] == -1, then i should be called forkAndRun
