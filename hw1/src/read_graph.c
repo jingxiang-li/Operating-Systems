@@ -93,7 +93,6 @@ int convert_string_to_ProcNode(const char *str, int count,
   }
   if (numtokens != 4) {
     printf("%s cannot be seperated into 4 parts\n", str);
-    perror(NULL);
     return -1;
   }
   if (convert_argv_to_ProcNode(myargv, count, proc_node) == -1) return -1;
@@ -125,7 +124,7 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
   }
 
   int num_lines = countLines(stream);
-  if (num_lines == -1) return -1;
+  if (num_lines < 1) return -1;
 
   *proc_node_array = NULL;
   *proc_node_array = (ProcNode *)malloc(sizeof(ProcNode) * (num_lines));
@@ -145,7 +144,6 @@ int read_graph_file(int argc, char **argv, ProcNode **proc_node_array) {
     if (strcmp(line, "\n") == 0) continue;
     if (convert_string_to_ProcNode(line, count, *proc_node_array + count) ==
         -1) {
-      free(proc_node_array);
       return -1;
     }
     count++;

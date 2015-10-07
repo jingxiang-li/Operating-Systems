@@ -42,3 +42,5 @@ test:
 	$(BINDIR)/$(TARGET) res/pa1-release/testCycle0.txt
 	$(BINDIR)/$(TARGET) res/pa1-release/testCycle1.txt
 	$(BINDIR)/$(TARGET) res/pa1-release/testfail0.txt
+	$(BINDIR)/$(TARGET) res/pa1-release/testgraph_blank.txt
+	$(BINDIR)/$(TARGET) res/pa1-release/testgraph_wrongsyntax.txt
