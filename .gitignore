@@ -31,6 +31,9 @@
 # Debug files
 *.dSYM/
 
-#compression file
+# Compression file
 *.tar
 *.tar.gz
+
+# Resources
+res/
