@@ -37,3 +37,6 @@
 
 # Resources
 res/
+
+# Sublime Text Project File
+*.sublime*
