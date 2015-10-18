@@ -6,11 +6,13 @@
 #include <dirent.h>
 #include <libgen.h>
 #include <errno.h>
+#include "./utility.h"
+#include "./encode.h"
 
 // static int kPathSize = 1024;
-static int kBufferSize = 4096;
+static const int kBufferSize = 4096;
 
-int make_output_folder(char *output_dir, char *flag, char *dirname);
+int make_output_folder(char *output_dir, char *dirname);
 
 int main(int argc, char **argv) {
     if (argc != 4) {
@@ -22,12 +24,12 @@ int main(int argc, char **argv) {
     char *flag = argv[1];
     char *input_dir = argv[2];
     char *output_dir = argv[3];
-    if (-1 == make_output_folder(output_dir, flag, input_dir))
-        return 0;
-    printf("%s\n", getcwd(NULL, 1024));
+    if (-1 == make_output_folder(output_dir, input_dir)) return 0;
+    recursive_dir("./", encode_file);
+    return 0;
 }
 
-int make_output_folder(char *output_dir, char *flag, char *input_dir) {
+int make_output_folder(char *output_dir, char *input_dir) {
     /**
      * make the output folder
      */
@@ -52,7 +54,6 @@ int make_output_folder(char *output_dir, char *flag, char *input_dir) {
      * remove directory with the name same as the input folder,
      * inside the output folder
      */
-
     char system_call_rm[kBufferSize];
     if (sprintf(system_call_rm, "rm -rf %s/%s", output_dir,
                 basename(input_dir)) < 0) {
@@ -63,11 +64,12 @@ int make_output_folder(char *output_dir, char *flag, char *input_dir) {
         perror("Failed to remove directory with the input directory's name");
         return -1;
     }
+
     /**
      * copy input folder into the output folder
      */
     char system_call_cp[kBufferSize];
-    if (sprintf(system_call_cp, "cp -rf %s %s/", input_dir, output_dir) < 0) {
+    if (sprintf(system_call_cp, "cp -ar %s %s/", input_dir, output_dir) < 0) {
         perror("Failed to make copy argument");
         return -1;
     }
