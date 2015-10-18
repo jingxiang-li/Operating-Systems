@@ -27,8 +27,24 @@ clean:
 .PHONEY: run-test
 run-test: $(TARGET)
 	@rm -rf $(OUTPUTDIR)
+	./$(TARGET) -e ./res/pa2_4061/encodetest01 $(OUTPUTDIR)
 	./$(TARGET) -e ./res/pa2_4061/encodetest02 $(OUTPUTDIR)
-	diff -rq ./output/encodetest02/ ./res/pa2_4061/decodetest02/
-	# ./$(TARGET) -e ./res/pa2_4061/extracredit_encode01 $(OUTPUTDIR)
-	# diff -rq ./output/extracredit_encode01/ ./res/pa2_4061/extracredit_decode01/
+	./$(TARGET) -e ./res/pa2_4061/encodetest03 $(OUTPUTDIR)
+	./$(TARGET) -e ./res/pa2_4061/encodetest04 $(OUTPUTDIR)
+	./$(TARGET) -e ./res/pa2_4061/extracredit_encode01 $(OUTPUTDIR)
+	./$(TARGET) -d ./res/pa2_4061/decodetest01 $(OUTPUTDIR)
+	./$(TARGET) -d ./res/pa2_4061/decodetest02 $(OUTPUTDIR)
+	./$(TARGET) -d ./res/pa2_4061/decodetest03 $(OUTPUTDIR)
+	./$(TARGET) -d ./res/pa2_4061/decodetest04 $(OUTPUTDIR)
+	./$(TARGET) -d ./res/pa2_4061/extracredit_decode01 $(OUTPUTDIR)
+	diff -rq ./output/encodetest01 ./res/pa2_4061/decodetest01
+	diff -rq ./output/encodetest02 ./res/pa2_4061/decodetest02
+	diff -rq ./output/encodetest03 ./res/pa2_4061/decodetest03
+	diff -rq ./output/encodetest04 ./res/pa2_4061/decodetest04
+	diff -rq ./output/extracredit_encode01/ ./res/pa2_4061/extracredit_decode01/
+	diff -rq ./output/decodetest01 ./res/pa2_4061/encodetest01
+	diff -rq ./output/decodetest02 ./res/pa2_4061/encodetest02
+	diff -rq ./output/decodetest03 ./res/pa2_4061/encodetest03
+	diff -rq ./output/decodetest04 ./res/pa2_4061/encodetest04
+	diff -rq ./output/extracredit_decode01/ ./res/pa2_4061/extracredit_encode01/
 

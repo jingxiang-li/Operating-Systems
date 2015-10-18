@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <libgen.h>
+#include <sys/wait.h>
 #include "./copyfile.h"
 
 static const int kBufferSize = 4096;
@@ -115,9 +116,11 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file,
             // check if this is a hard link
             printf("%s is a potential hard link\n", entry_path);
             if (is_useless_hardlink(&entry_stat, hardlink_array, *size)) {
-                // this is a useless hard link, treat it as symbol link
+// this is a useless hard link, treat it as symbol link
+#ifdef DEBUG
                 fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
                         "hard link", 0, 0);
+#endif  // DEBUG
                 continue;
             } else {
                 // this is a useful hard link, add it to the hardlink_array
@@ -230,6 +233,50 @@ int make_output_folder(char *output_dir, char *input_dir) {
     }
     if (-1 == chdir(new_wd)) {
         perror("Failed to change working directory");
+        return -1;
+    }
+    return 0;
+}
+
+int sort_file(char *filepath) {
+    if (!file_exists(filepath)) {
+        fprintf(stderr, "Failed to sort file %s, file doesn't exists\n",
+                filepath);
+        return -1;
+    }
+    char *input_path = clone_file(filepath);
+    char *output_path = filepath;
+
+    pid_t child_id = fork();
+    int childExitStatus;
+    if (child_id == -1) {
+        fprintf(stderr, "Failed to sort file %s, can't fork child\n", filepath);
+        perror(NULL);
+    }
+
+    if (child_id == 0) {
+        // child goes here, redirect stdout and execute sort
+        int output_fd = open(output_path, O_WRONLY | O_TRUNC);
+        dup2(output_fd, STDOUT_FILENO);
+        close(output_fd);
+        execlp("sort", "sort", input_path, (char *)0);
+    } else {
+        pid_t ws = wait(&childExitStatus);
+        if (ws == -1) {
+            fprintf(stderr,
+                    "Failed to wait child process while sorting file %s\n",
+                    filepath);
+            perror(NULL);
+            return -1;
+        }
+        if (!WIFEXITED(childExitStatus)) {
+            fprintf(stderr, "Failed to sort file %s\n", filepath);
+            perror(NULL);
+            return -1;
+        }
+    }
+    if (-1 == unlink(input_path)) {
+        fprintf(stderr, "Failed to remove file %s\n", input_path);
         return -1;
     }
     return 0;

@@ -6,8 +6,10 @@
 #include <dirent.h>
 #include <libgen.h>
 #include <errno.h>
+#include <string.h>
 #include "./utility.h"
 #include "./encode.h"
+#include "./decode.h"
 
 // static int kPathSize = 1024;
 static const int kBufferSize = 4096;
@@ -19,14 +21,14 @@ int main(int argc, char **argv) {
         fprintf(
             stderr,
             "Usage: ./codec_4061 -[ed] <input_directory> <output_directory>\n");
-        return 0;
+        return -1;
     }
     char *flag = argv[1];
     char *input_dir = argv[2];
     char *output_dir = argv[3];
 
     // make and change to the output folder
-    if (-1 == make_output_folder(output_dir, input_dir)) return 0;
+    if (-1 == make_output_folder(output_dir, input_dir)) return -1;
 
     // make the report file
     char report_file_path[kBufferSize];
@@ -34,7 +36,7 @@ int main(int argc, char **argv) {
         0) {
         fprintf(stderr, "Failed to construct path to the report file\n");
         perror(NULL);
-        return 0;
+        return -1;
     }
     FILE *report_file = fopen(report_file_path, "w");
 
@@ -43,10 +45,25 @@ int main(int argc, char **argv) {
     int size_of_hardlink_array = 0;
 
     // recursively process the directory
-    recursive_dir("./", encode_file, report_file, hardlink_array,
-                  &size_of_hardlink_array);
+    if (0 == strcmp(flag, "-e")) {
+        recursive_dir("./", encode_file, report_file, hardlink_array,
+                      &size_of_hardlink_array);
+    } else if (0 == strcmp(flag, "-d")) {
+        recursive_dir("./", decode_file, report_file, hardlink_array,
+                      &size_of_hardlink_array);
+    } else {
+        fprintf(stderr,
+                "Invalid flag, Usage: ./codec_4061 -[ed] <input_directory> "
+                "<output_directory>\n");
+        return -1;
+    }
+
+    // sort the report file
+    fclose(report_file);
+    if (-1 == sort_file(report_file_path)) {
+        return -1;
+    }
 
     // free resources and return
-    fclose(report_file);
     return 0;
 }

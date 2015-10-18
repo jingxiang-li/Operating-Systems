@@ -57,4 +57,12 @@ int is_useless_hardlink(struct stat *entry_stat, ino_t *hardlink_array,
  * @return            0 on success, otherwise -1
  */
 int make_output_folder(char *output_dir, char *dirname);
+
+/**
+ * sort the given file
+ * @param  filepath path to the file
+ * @return          0 on success, otherwise -1
+ */
+int sort_file(char *filepath);
+
 #endif  // UTILITY_H
