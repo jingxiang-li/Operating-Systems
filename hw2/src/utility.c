@@ -113,14 +113,14 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file,
                                     size))
                 return -1;
         } else if (entry_stat.st_nlink > 1) {
-            // check if this is a hard link
-            printf("%s is a potential hard link\n", entry_path);
-            if (is_useless_hardlink(&entry_stat, hardlink_array, *size)) {
-// this is a useless hard link, treat it as symbol link
+// check if this is a hard link
 #ifdef DEBUG
+            printf("%s is a potential hard link\n", entry_path);
+#endif  // DEBUG
+            if (is_useless_hardlink(&entry_stat, hardlink_array, *size)) {
+                // this is a useless hard link, treat it as symbol link
                 fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
                         "hard link", 0, 0);
-#endif  // DEBUG
                 continue;
             } else {
                 // this is a useful hard link, add it to the hardlink_array
@@ -259,7 +259,8 @@ int sort_file(char *filepath) {
         int output_fd = open(output_path, O_WRONLY | O_TRUNC);
         dup2(output_fd, STDOUT_FILENO);
         close(output_fd);
-        execlp("sort", "sort", input_path, (char *)0);
+        putenv("LC_ALL=C");
+        execlp("sort", "sort", "-g", input_path, (char *)0);
     } else {
         pid_t ws = wait(&childExitStatus);
         if (ws == -1) {
