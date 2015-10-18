@@ -72,7 +72,8 @@ char *clone_file(char *filepath) {
     return new_filepath;
 }
 
-int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file) {
+int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file,
+                  ino_t *hardlink_array, int *size) {
     if (!dir_exists(dirpath)) return -1;
 
     DIR *dirp = opendir(dirpath);
@@ -107,7 +108,35 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file) {
             // this is a directory, call recursive_dir on this directory
             fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
                     "directory", 0, 0);
-            if (-1 == recursive_dir(entry_path, fn, report_file)) return -1;
+            if (-1 == recursive_dir(entry_path, fn, report_file, hardlink_array,
+                                    size))
+                return -1;
+        } else if (entry_stat.st_nlink > 1) {
+            // check if this is a hard link
+            printf("%s is a potential hard link\n", entry_path);
+            if (is_useless_hardlink(&entry_stat, hardlink_array, *size)) {
+                // this is a useless hard link, treat it as symbol link
+                fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
+                        "hard link", 0, 0);
+                continue;
+            } else {
+                // this is a useful hard link, add it to the hardlink_array
+                // and increase the size
+                hardlink_array[*size] = entry_stat.st_ino;
+                (*size) += 1;
+
+                // treat it as a regular file
+                fprintf(report_file, "%s, %s, %ld, ", basename(entry_path),
+                        "regular file", entry_stat.st_size);
+                if (-1 == fn(entry_path)) return -1;
+                if (-1 == lstat(entry_path, &entry_stat)) {
+                    fprintf(stderr,
+                            "Failed to get stat information for file %s\n",
+                            entry_path);
+                    return -1;
+                }
+                fprintf(report_file, "%ld\n", entry_stat.st_size);
+            }
         } else if (S_ISREG(entry_stat.st_mode)) {
             // this is a regular file, call fn on this file
             fprintf(report_file, "%s, %s, %ld, ", basename(entry_path),
@@ -131,5 +160,13 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file) {
     }
 
     closedir(dirp);
+    return 0;
+}
+
+int is_useless_hardlink(struct stat *entry_stat, ino_t *hardlink_array,
+                        int size) {
+    for (int i = 0; i != size; i++) {
+        if (hardlink_array[i] == entry_stat->st_ino) return 1;
+    }
     return 0;
 }

@@ -29,4 +29,6 @@ run-test: $(TARGET)
 	@rm -rf $(OUTPUTDIR)
 	./$(TARGET) -e ./res/pa2_4061/encodetest02 $(OUTPUTDIR)
 	diff -rq ./output/encodetest02/ ./res/pa2_4061/decodetest02/
+	# ./$(TARGET) -e ./res/pa2_4061/extracredit_encode01 $(OUTPUTDIR)
+	# diff -rq ./output/extracredit_encode01/ ./res/pa2_4061/extracredit_decode01/
 

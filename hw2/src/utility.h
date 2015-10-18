@@ -2,6 +2,8 @@
 #define UTILITY_H
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /**
  * check if the file exists
@@ -26,13 +28,26 @@ int dir_exists(char *dirpath);
 char *clone_file(char *filepath);
 
 /**
- * process all files inside the directory using function fn recursively
- * @param  dirpath     filepath path to the file
- * @param  fn          a function which will be applied to all regular
- * files inside the directory.
- * @param  report_file report_file file to be written as report.txt
- * @return             0 on success; -1 otherwise.
+ * recursively apply function fn to all the files in the dirpath
+ * @param  dirpath        path to the directory
+ * @param  fn             function to be applied to files in the directory
+ * @param  report_file    file to be written as report
+ * @param  hardlink_array array of hard links that has been seen
+ * @param  size           the current size of the hardlink array
+ * @return                0 on success, -1 otherwise
  */
-int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file);
+int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file,
+                  ino_t *hardlink_array, int *size);
+
+/**
+ * check if a file is an useless hard link (we call a hard link useless
+ * if it has already been processed)
+ * @param  entry_stat     the stat information of the file
+ * @param  hardlink_array array of hardlinks that has been seen
+ * @param  size           the current size of the hardlink array
+ * @return                1 if it's useless, 0 if not.
+ */
+int is_useless_hardlink(struct stat *entry_stat, ino_t *hardlink_array,
+                        int size);
 
 #endif  // UTILITY_H
