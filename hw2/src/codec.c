@@ -1,4 +1,4 @@
-#include "codec.h"
+#include "./codec.h"
 #include <string.h>
 
 #define WHITESPACE 64

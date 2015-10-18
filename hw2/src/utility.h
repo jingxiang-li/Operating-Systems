@@ -2,8 +2,8 @@
 #define UTILITY_H
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 /**
  * check if the file exists

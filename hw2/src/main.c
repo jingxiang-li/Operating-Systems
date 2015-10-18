@@ -1,15 +1,15 @@
+#include "./decode.h"
+#include "./encode.h"
+#include "./utility.h"
+#include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <dirent.h>
-#include <libgen.h>
-#include <errno.h>
-#include <string.h>
-#include "./utility.h"
-#include "./encode.h"
-#include "./decode.h"
+#include <unistd.h>
 
 // static int kPathSize = 1024;
 static const int kBufferSize = 4096;

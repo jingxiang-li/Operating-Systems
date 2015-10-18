@@ -1,8 +1,8 @@
 #ifndef __CODEC_H__
 #define __CODEC_H__
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /* Returns 1 if 'val' is a valid char under the encoding scheme */
 int is_valid_char(uint8_t val);
