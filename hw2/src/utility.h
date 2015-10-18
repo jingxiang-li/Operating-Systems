@@ -50,4 +50,11 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file,
 int is_useless_hardlink(struct stat *entry_stat, ino_t *hardlink_array,
                         int size);
 
+/**
+ * make and change working directory to the output folder
+ * @param  output_dir target output folder
+ * @param  dirname    directory to be processed
+ * @return            0 on success, otherwise -1
+ */
+int make_output_folder(char *output_dir, char *dirname);
 #endif  // UTILITY_H
