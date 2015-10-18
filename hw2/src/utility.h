@@ -1,6 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#include <stdio.h>
+
 /**
  * check if the file exists
  * @param  filepath path to the file
@@ -25,11 +27,12 @@ char *clone_file(char *filepath);
 
 /**
  * process all files inside the directory using function fn recursively
- * @param  filepath path to the file
- * @param  f        a function which will be applied to all regular
+ * @param  dirpath     filepath path to the file
+ * @param  fn          a function which will be applied to all regular
  * files inside the directory.
- * @return          0 on success; -1 otherwise.
+ * @param  report_file report_file file to be written as report.txt
+ * @return             0 on success; -1 otherwise.
  */
-int recursive_dir(char *dirpath, int (*fn)(char *filepath));
+int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file);
 
 #endif  // UTILITY_H

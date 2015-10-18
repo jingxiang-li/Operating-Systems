@@ -10,7 +10,4 @@
  */
 int encode_file(char *filepath);
 
-
-int encode_file_report(char *filepath, FILE *report_file);
-
 #endif  // ENCODE_H

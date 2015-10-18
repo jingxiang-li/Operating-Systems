@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <libgen.h>
 #include "./copyfile.h"
 
 static const int kBufferSize = 4096;
@@ -71,7 +72,7 @@ char *clone_file(char *filepath) {
     return new_filepath;
 }
 
-int recursive_dir(char *dirpath, int (*fn)(char *filepath)) {
+int recursive_dir(char *dirpath, int (*fn)(char *filepath), FILE *report_file) {
     if (!dir_exists(dirpath)) return -1;
 
     DIR *dirp = opendir(dirpath);
@@ -104,12 +105,24 @@ int recursive_dir(char *dirpath, int (*fn)(char *filepath)) {
 
         if (S_ISDIR(entry_stat.st_mode)) {
             // this is a directory, call recursive_dir on this directory
-            if (-1 == recursive_dir(entry_path, fn)) return -1;
+            fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
+                    "directory", 0, 0);
+            if (-1 == recursive_dir(entry_path, fn, report_file)) return -1;
         } else if (S_ISREG(entry_stat.st_mode)) {
             // this is a regular file, call fn on this file
+            fprintf(report_file, "%s, %s, %ld, ", basename(entry_path),
+                    "regular file", entry_stat.st_size);
             if (-1 == fn(entry_path)) return -1;
+            if (-1 == lstat(entry_path, &entry_stat)) {
+                fprintf(stderr, "Failed to get stat information for file %s\n",
+                        entry_path);
+                return -1;
+            }
+            fprintf(report_file, "%ld\n", entry_stat.st_size);
         } else if (S_ISLNK(entry_stat.st_mode)) {
             // this is a symbolic link, skip it
+            fprintf(report_file, "%s, %s, %d, %d\n", basename(entry_path),
+                    "sym link", 0, 0);
             continue;
         } else {
             fprintf(stderr, "some unkown type of file %s\n", entry_path);

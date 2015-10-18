@@ -25,7 +25,18 @@ int main(int argc, char **argv) {
     char *input_dir = argv[2];
     char *output_dir = argv[3];
     if (-1 == make_output_folder(output_dir, input_dir)) return 0;
-    recursive_dir("./", encode_file);
+
+    char report_file_path[kBufferSize];
+    if (sprintf(report_file_path, "../%s_report.txt", basename(input_dir)) <
+        0) {
+        fprintf(stderr, "Failed to construct path to the report file\n");
+        perror(NULL);
+        return 0;
+    }
+
+    FILE *report_file = fopen(report_file_path, "w");
+    recursive_dir("./", encode_file, report_file);
+
     return 0;
 }
 

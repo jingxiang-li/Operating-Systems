@@ -27,6 +27,6 @@ clean:
 .PHONEY: run-test
 run-test: $(TARGET)
 	@rm -rf $(OUTPUTDIR)
-	./$(TARGET) -e ./res/pa2_4061/encodetest03 $(OUTPUTDIR)
-	diff -rq ./output/encodetest03/ ./res/pa2_4061/decodetest03/
+	./$(TARGET) -e ./res/pa2_4061/encodetest02 $(OUTPUTDIR)
+	diff -rq ./output/encodetest02/ ./res/pa2_4061/decodetest02/
 
