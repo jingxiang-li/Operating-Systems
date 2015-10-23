@@ -1,3 +1,10 @@
+/**
+ * This file contains implementations for utility.h
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:18:06 AM CDT
+ */
+
 #include "./copyfile.h"
 #include "./utility.h"
 #include <dirent.h>

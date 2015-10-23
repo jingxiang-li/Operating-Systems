@@ -1,5 +1,12 @@
+/**
+ * This file contains implementations for encode.h
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:13:56 AM CDT
+ */
+
 #include "./codec.h"
-#include "./decode.h"
+#include "./encode.h"
 #include "./utility.h"
 #include <dirent.h>
 #include <errno.h>
@@ -11,10 +18,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-static const int kNumRead = 4;
-static const int kNumWrite = 3;
+static const int kNumRead = 3;
+static const int kNumWrite = 4;
 
-int decode_file(char *filepath) {
+int encode_file(char *filepath) {
 #ifdef DEBUG
     printf("processing %s\n", filepath);
 #endif  // DEBUG
@@ -64,26 +71,29 @@ int decode_file(char *filepath) {
         memset(write_buf, 0, kNumWrite);
         num_read = read(input_fd, read_buf, kNumRead);
 
-        if (kNumRead > num_read) break;  // finish reading the file
+        if (0 == num_read) break;  // finish reading the file
 
         if (-1 == num_read) {
             fprintf(stderr, "Failed to read bytes from %s\n", input_path);
             return -1;
         }
 
-        for (int i = 0; i != kNumRead; i++) {
-            if (!is_valid_char(read_buf[i])) {
-                fprintf(stderr, "%s contains invalid character %d\n", filepath, read_buf[i]);
-                break;
-            }
-        }
-
-        num_write = decode_block(read_buf, write_buf);
+        num_write = encode_block(read_buf, write_buf, num_read);
         if (num_write != write(output_fd, write_buf, num_write)) {
             fprintf(stderr, "Failed to write %d bytes into %s\n", num_write,
                     output_path);
             return -1;
         }
+    }
+
+    /**
+     * write a newline sign to the output_fd
+     */
+    write_buf[0] = 0x0a;
+    if (1 != write(output_fd, write_buf, 1)) {
+        fprintf(stderr, "Failed to write the newline sign to %s\n",
+                output_path);
+        return -1;
     }
 
     /**

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -fstack-protector -Wextra -Wunreachable-code -O -std=c99 -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
 TARGET = codec_4061
-SRCDIR = src
+SRCDIR = .
 OBJDIR = obj
 OUTPUTDIR = output
 SOURCES = $(wildcard $(SRCDIR)/*.c)

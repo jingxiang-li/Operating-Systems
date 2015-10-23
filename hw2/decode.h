@@ -1,3 +1,10 @@
+/**
+ * This file contains declarations of functions for decoding a file
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:13:13 AM CDT
+ */
+
 #ifndef DECODE_H
 #define DECODE_H
 

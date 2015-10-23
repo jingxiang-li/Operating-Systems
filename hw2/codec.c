@@ -1,3 +1,9 @@
+/**
+ * This file contains implementations for codec.h
+ *
+ * Copied from pa2_4061_release.tar.gz
+ */
+
 #include "./codec.h"
 #include <string.h>
 

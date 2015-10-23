@@ -1,3 +1,10 @@
+/**
+ * This file contains declarations of functions for encoding and
+ * decoding array of chars.
+ *
+ * Copied from pa2_4061_release.tar.gz
+ */
+
 #ifndef __CODEC_H__
 #define __CODEC_H__
 

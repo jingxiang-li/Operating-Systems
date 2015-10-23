@@ -1,3 +1,10 @@
+/**
+ * This file contains declarations of functions for encoding a file
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:13:13 AM CDT
+ */
+
 #ifndef ENCODE_H
 #define ENCODE_H
 

@@ -1,3 +1,13 @@
+/**
+ * This file contains the main functions for recursively decoding
+ * or encoding all files in a given directory
+ *
+ * Usage: ./codec_4061 -[ed] <input_directory> <output_directory>
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:16:24 AM CDT
+ */
+
 #include "./decode.h"
 #include "./encode.h"
 #include "./utility.h"

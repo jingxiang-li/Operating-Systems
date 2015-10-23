@@ -1,0 +1,22 @@
+/**
+ * name: Jingxiang Li, Yuchen Wang
+ * x500: 5095269, 4644045
+ * CSELabs machine: csel-kh1250-12
+ */
+
+==========================
+Overview
+==========================
+- This is a "codec_4061" program in C that will recursively decode or encode all files in a given directory and compile a report for the result of the program.
+
+==========================
+Compiling and Running
+==========================
+- To compile it, use: "make all", then "codec_4061" can be found in the current working directory
+- To run the program, use "./codec_4061 -[ed] <input_directory> <output_directory>"
+- To remove everything other than source files, use: "make clean"
+
+==========================
+Implementation
+==========================
+- The program will first copy all the files to the output folder recursively, then process each file the the output folder in a pre-order way. To process each file, the program will first make a clone of the target file, then encode (or decode) the cloned file and redirect the encoded (or decoded) contents to the original file. The cloned file will be removed after the encoding or decoding process completes.

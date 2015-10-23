@@ -1,3 +1,10 @@
+/**
+ * This file contains declarations for several utility functions
+ *
+ * Author: Jingxiang Li
+ * Date: Fri 23 Oct 2015 01:17:44 AM CDT
+ */
+
 #ifndef UTILITY_H
 #define UTILITY_H
 

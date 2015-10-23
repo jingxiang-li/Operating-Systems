@@ -1,3 +1,10 @@
+/**
+ * This file contains implementations for copyfile.h
+ *
+ * Author: Jingxiang Li
+ * Time: Fri 23 Oct 2015 01:10:58 AM CDT
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
