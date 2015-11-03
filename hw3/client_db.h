@@ -69,4 +69,10 @@ Client *get_client(Client_DB *client_db, int index);
  */
 int get_city_name(char *filepath, char *city_name);
 
+/**
+ * print the client database to stdout
+ * @param client_db pointer to the client database instance
+ */
+void print_client_db(Client_DB *client_db);
+
 #endif  // CLIENT_DB_H

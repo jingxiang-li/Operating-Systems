@@ -118,7 +118,20 @@ int get_city_name(char *filepath, char *city_name) {
     }
     fclose(input_file);
 
+    line_buffer[strlen(line_buffer) - 1] = '\0';
     strncpy(city_name, line_buffer, MAX_CITY_NAME_SIZE);
 
     return 0;
+}
+
+void print_client_db(Client_DB *client_db) {
+    int size = client_db->size;
+
+    for (int i = 0; i != size; i++) {
+        Client *client = client_db->clients[i];
+        printf("index: %d\tclient_name: %s\tcity_name: %s\n", client->index,
+               client->name, client->city_name);
+    }
+
+    return;
 }

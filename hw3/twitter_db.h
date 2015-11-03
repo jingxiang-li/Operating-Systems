@@ -9,9 +9,17 @@
 #ifndef TWITTER_DB_H
 #define TWITTER_DB_H
 
+#ifndef MAX_DB_SIZE
 #define MAX_DB_SIZE 64
+#endif
+
+#ifndef MAX_CITY_NAME_SIZE
 #define MAX_CITY_NAME_SIZE 32
+#endif
+
+#ifndef MAX_KEYWORDS_SIZE
 #define MAX_KEYWORDS_SIZE 128
+#endif
 
 /**
  * definition of DB_ENTRY_t which is the entry for the twitter database
@@ -61,5 +69,11 @@ char *get_keywords(DB *db, char *city_name);
  * @return           0 on success; -1 otherwise.
  */
 int parse_line(const char *line, char *city_name, char *keywords);
+
+/**
+ * print the database to stdout
+ * @param db pointer to a database instance
+ */
+void print_db(DB *db);
 
 #endif  // TWITTER_DB_H

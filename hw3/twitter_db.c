@@ -132,3 +132,13 @@ int parse_line(const char *line, char *city_name, char *keywords) {
     strncpy(keywords, line_copy + i + 1, MAX_KEYWORDS_SIZE);
     return 0;
 }
+
+void print_db(DB *db) {
+    int size = db->size;
+    for (int i = 0; i != size; i++) {
+        DB_ENTRY *entry = db->db_entries[i];
+        printf("index: %d\tcity_name: %s\tkeywords: %s\n", i, entry->city_name,
+               entry->keywords);
+    }
+    return;
+}
