@@ -21,7 +21,7 @@ Queue *create_queue(int max_size) {
     Queue *queue = (Queue *)malloc(sizeof(Queue));
 
     if (NULL == queue) {
-        perror("Failed to create the Queue");
+        perror("Failed to allocate space for the Queue");
         return NULL;
     }
 
