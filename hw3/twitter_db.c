@@ -134,6 +134,8 @@ int parse_line(const char *line, char *city_name, char *keywords) {
 }
 
 void print_db(DB *db) {
+    printf("\n\tTwitter Keywords DataBase\n");
+
     int size = db->size;
     for (int i = 0; i != size; i++) {
         DB_ENTRY *entry = db->db_entries[i];

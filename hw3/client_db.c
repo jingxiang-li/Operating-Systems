@@ -125,8 +125,9 @@ int get_city_name(char *filepath, char *city_name) {
 }
 
 void print_client_db(Client_DB *client_db) {
-    int size = client_db->size;
+    printf("\n\tClient DataBase\n");
 
+    int size = client_db->size;
     for (int i = 0; i != size; i++) {
         Client *client = client_db->clients[i];
         printf("index: %d\tclient_name: %s\tcity_name: %s\n", client->index,
