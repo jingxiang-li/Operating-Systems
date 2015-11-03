@@ -40,3 +40,6 @@ res/
 
 # Sublime Text Project File
 *.sublime*
+
+# Tmp file
+*~
