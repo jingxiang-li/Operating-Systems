@@ -8,8 +8,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include "./queue.h"
 #include "./client_db.h"
+#include "./queue.h"
 #include "./twitter_db.h"
 #include <pthread.h>
 

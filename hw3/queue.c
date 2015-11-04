@@ -5,9 +5,9 @@
  * Date: Mon 02 Nov 2015 11:54:11 PM CST
  */
 
+#include "./queue.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "./queue.h"
 
 Queue *create_queue(int max_size) {
     if (max_size < 1) {

@@ -5,10 +5,10 @@
  * Date: Mon 02 Nov 2015 11:54:11 PM CST
  */
 
+#include "./twitter_db.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./twitter_db.h"
 
 static const int kBufferSize = 256;
 
