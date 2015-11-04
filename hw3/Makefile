@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -fstack-protector -Wextra -Wunreachable-code -O -std=c99 -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED
+CFLAGS = -Wall -fstack-protector -Wextra -Wunreachable-code -O -std=c99 -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED -lpthread
 TARGET = twitterTrend
 SRCDIR = .
 OBJDIR = obj
-OUTPUTDIR = output
+OUTPUTDIR = ./res/4061_PA03_to_be_released/
 SOURCES = $(wildcard $(SRCDIR)/*.c)
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
@@ -20,9 +20,10 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c $(SRCDIR)/%.h
 
 .PHONEY: clean
 clean:
-	@rm -rf $(OBJDIR) $(OUTPUTDIR) $(TARGET)
+	@rm -rf $(OBJDIR) $(TARGET)
+	@rm -rf $(wildcard $(OUTPUTDIR)/*.result)
 	@echo "Cleanup complete!"
 
 .PHONEY: run-test
-run-test:
-	./twitterTrend ./res/4061_PA03_to_be_released/client3.in 2
+run-test: $(TARGET)
+	./twitterTrend ./res/4061_PA03_to_be_released/client4.in 2

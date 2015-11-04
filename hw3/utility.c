@@ -8,12 +8,17 @@
 
 static const int kBufferSize = 256;
 
-int change_wd (char *input_file_path) {
+extern pthread_mutex_t queue_access;
+extern pthread_cond_t queue_not_full;
+extern pthread_cond_t queue_not_empty;
+
+int change_wd(char *input_file_path) {
     char *input_path_dup, *wd;
     input_path_dup = strdup(input_file_path);
     wd = dirname(input_path_dup);
     if (NULL == wd) {
-        fprintf(stderr, "Failed to get the parent directory for %s\n", input_path_dup);
+        fprintf(stderr, "Failed to get the parent directory for %s\n",
+                input_path_dup);
         perror(NULL);
         return -1;
     }
@@ -27,7 +32,7 @@ int change_wd (char *input_file_path) {
 }
 
 int compile_output(char *client_name, char *city_name, char *keywords) {
-    char output_path [kBufferSize];
+    char output_path[kBufferSize];
     sprintf(output_path, "./%s.result", client_name);
 
     FILE *output_file = fopen(output_path, "w+");
@@ -56,10 +61,47 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
 
         int index, pop_result;
 
-        // CRITICAL SECTION
+        // CRITICAL SECTION====================================================
+        pthread_mutex_lock(&queue_access);
+        /**
+         * if the thread is blocked above queue_access and no client
+         * is left for processing when it's unblocked, unlock
+         * queue_access immediately and return
+         */
+        if (0 == *num_clients_left) {
+            pthread_mutex_unlock(&queue_access);
+            return NULL;
+        }
+
+        // wait until num_clients_left is 0 or queue is not empty
+        while (is_empty(queue) && 0 != *num_clients_left)
+            pthread_cond_wait(&queue_not_empty, &queue_access);
+
+        /**
+         * if the thread is blocked because of the conditional variable,
+         * and it's unblocked by the broadcast (when 0 == *num_clients_left),
+         * unlock queue_access immediately and return
+         */
+        if (0 == *num_clients_left) {
+            pthread_mutex_unlock(&queue_access);
+            return NULL;
+        }
+
         pop_result = pop(queue, &index);
         (*num_clients_left)--;
-        // END OF CRITICAL SECTION
+
+        // signal that the queue is not full now
+        pthread_cond_signal(&queue_not_full);
+
+        /**
+         * if no client is left for processing after current processing,
+         * broadcast the conditional variable to have all threads that
+         * blocked by the conditional variable unblocked
+         */
+        if (0 == *num_clients_left) pthread_cond_broadcast(&queue_not_empty);
+
+        pthread_mutex_unlock(&queue_access);
+        // END OF CRITICAL SECTION=============================================
 
         if (-1 == pop_result) {
             fprintf(stderr, "Failed to pop element from the queue\n");
@@ -96,3 +138,17 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
     return NULL;
 }
 
+void *process_queue_mt(void *_argv) {
+    // parse _argv to a pointer to Queue_Process_Argv
+    Queue_Process_Argv *argv = (Queue_Process_Argv *)_argv;
+
+    Queue *queue = argv->queue;
+    Client_DB *client_db = argv->client_db;
+    DB *twitter_db = argv->twitter_db;
+    int thread_id = argv->thread_id;
+    int *num_clients_left = argv->num_clients_left;
+
+    // call single thread version process_queue
+    return process_queue(queue, client_db, twitter_db, thread_id,
+                         num_clients_left);
+}

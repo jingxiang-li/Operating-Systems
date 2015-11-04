@@ -11,6 +11,16 @@
 #include "./queue.h"
 #include "./client_db.h"
 #include "./twitter_db.h"
+#include <pthread.h>
+
+// argv for the queue_process function
+typedef struct Queue_Process_Argv_t {
+    Queue *queue;
+    Client_DB *client_db;
+    DB *twitter_db;
+    int thread_id;
+    int *num_clients_left;
+} Queue_Process_Argv;
 
 /**
  * change the currect working directory to the directory holding
@@ -41,4 +51,12 @@ int compile_output(char *client_name, char *city_name, char *keywords);
  */
 void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
                     int thread_id, int *num_clients_left);
+
+/**
+ * process the client queue, for multi-thread programming
+ * @param  argv pointer to Queue_Process_Argv
+ * @return      NULL
+ */
+void *process_queue_mt(void *_argv);
+
 #endif  // UTILITY_H
