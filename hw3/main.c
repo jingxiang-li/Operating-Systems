@@ -11,18 +11,14 @@
 #include "./utility.h"
 #include <libgen.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <semaphore.h>
 
 #ifndef LOCKS
 #define LOCKS
-pthread_mutex_t queue_access = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t queue_not_full = PTHREAD_COND_INITIALIZER;
-pthread_cond_t queue_not_empty = PTHREAD_COND_INITIALIZER;
-
 sem_t sem_queue, sem_items, sem_slots;
 #endif
 

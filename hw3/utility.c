@@ -1,19 +1,15 @@
 #include "./utility.h"
+#include <errno.h>
 #include <libgen.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <unistd.h>
-#include <semaphore.h>
-#include <errno.h>
 
 static const int kBufferSize = 256;
-
-extern pthread_mutex_t queue_access;
-extern pthread_cond_t queue_not_full;
-extern pthread_cond_t queue_not_empty;
 
 extern sem_t sem_queue, sem_items, sem_slots;
 
