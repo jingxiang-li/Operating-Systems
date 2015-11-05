@@ -15,12 +15,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <semaphore.h>
 
 #ifndef LOCKS
 #define LOCKS
 pthread_mutex_t queue_access = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t queue_not_full = PTHREAD_COND_INITIALIZER;
 pthread_cond_t queue_not_empty = PTHREAD_COND_INITIALIZER;
+
+sem_t sem_queue, sem_items, sem_slots;
 #endif
 
 int main(int argc, char **argv) {
@@ -59,6 +62,10 @@ int main(int argc, char **argv) {
     //=========================================================================
     // multi-thread programming from here
 
+    sem_init(&sem_queue, 0, 1);
+    sem_init(&sem_items, 0, 0);
+    sem_init(&sem_slots, 0, queue->max_size);
+
     int push_result;
     pthread_t threads[num_threads];
 
@@ -79,15 +86,38 @@ int main(int argc, char **argv) {
         }
     }
 
+    int sem_slots_val;
+
     // push element to the queue in tha main thread
     for (int i = 0; i < client_db->size; i++) {
         // CRITICAL SECTION====================================================
-        pthread_mutex_lock(&queue_access);
 
-        // wait until the queue is not full
-        while (is_full(queue)) {
+        // get the current value from the semaphore of queue slots
+        // to determine if the main thread need to wait for a
+        // empty slot
+        if (-1 == sem_getvalue(&sem_slots, &sem_slots_val)) {
+            fprintf(stderr,
+                    "Failed to get value from the semaphore of queue slots\n");
+            perror(NULL);
+            exit(EXIT_FAILURE);
+        }
+        if (0 == sem_slots_val) {
             printf("Waiting to add clients to the full queue\n");
-            pthread_cond_wait(&queue_not_full, &queue_access);
+        }
+
+        // wait for a empty slot in the queue
+        if (-1 == sem_wait(&sem_slots)) {
+            fprintf(stderr, "Failed to wait empty slots in the queue\n");
+            perror(NULL);
+            exit(EXIT_FAILURE);
+        }
+
+        // wait for the queue access
+        if (-1 == sem_wait(&sem_queue)) {
+            fprintf(stderr,
+                    "Failed to wait the queue_access in the main thread\n");
+            perror(NULL);
+            exit(EXIT_FAILURE);
         }
 
         push_result = push(queue, i);
@@ -96,10 +126,20 @@ int main(int argc, char **argv) {
             exit(EXIT_FAILURE);
         }
 
-        // signal that the queue is not empty now
-        pthread_cond_signal(&queue_not_empty);
-
-        pthread_mutex_unlock(&queue_access);
+        if (-1 == sem_post(&sem_queue)) {
+            fprintf(stderr,
+                    "Main thread failed to wake up threads waiting for the "
+                    "queue access\n");
+            perror(NULL);
+            exit(EXIT_FAILURE);
+        }
+        if (-1 == sem_post(&sem_items)) {
+            fprintf(stderr,
+                    "Failed to wake up threads waiting for avaliable items in "
+                    "the queue\n");
+            perror(NULL);
+            exit(EXIT_FAILURE);
+        }
         // END OF CRITICAL SECTION=============================================
     }
 

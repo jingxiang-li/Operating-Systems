@@ -5,12 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <errno.h>
 
 static const int kBufferSize = 256;
 
 extern pthread_mutex_t queue_access;
 extern pthread_cond_t queue_not_full;
 extern pthread_cond_t queue_not_empty;
+
+extern sem_t sem_queue, sem_items, sem_slots;
 
 int change_wd(char *input_file_path) {
     char *input_path_dup, *wd;
@@ -62,41 +67,42 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
         int index, pop_result;
 
         // CRITICAL SECTION====================================================
-        pthread_mutex_lock(&queue_access);
-        /**
-         * if the thread is blocked above queue_access and no client
-         * is left for processing when it's unblocked, unlock
-         * queue_access immediately and return
-         */
-        if (0 == *num_clients_left) {
-            pthread_mutex_unlock(&queue_access);
+        if (-1 == sem_wait(&sem_items)) {
+            fprintf(stderr, "Failed to wait items in the queue\n");
+            perror(NULL);
             return NULL;
         }
 
-        // wait until num_clients_left is 0 or queue is not empty
-        while (is_empty(queue) && 0 != *num_clients_left)
-            pthread_cond_wait(&queue_not_empty, &queue_access);
-
-        /**
-         * if the thread is blocked because of the conditional variable,
-         * and it's unblocked by the broadcast (when 0 == *num_clients_left),
-         * unlock queue_access immediately and return
-         */
-        if (0 == *num_clients_left) {
-            pthread_mutex_unlock(&queue_access);
+        if (-1 == sem_wait(&sem_queue)) {
+            fprintf(stderr, "Failed to unlock the queue when it's free\n");
+            perror(NULL);
             return NULL;
         }
 
-        // pop element from the queue and process it
+        /**
+         * if no client is left for processing, unlock the queue access
+         * then return immediately
+         */
+        if (0 == *num_clients_left) {
+            sem_post(&sem_queue);
+            return NULL;
+        }
+
+        // pop element from the queue
         pop_result = pop(queue, &index);
         if (-1 == pop_result) {
             fprintf(stderr, "Failed to pop element from the queue\n");
+            sem_post(&sem_queue);
             return NULL;
         }
+        // decrement the counter for clients
+        (*num_clients_left)--;
 
+        // get the client information using the index
         Client *client = get_client(client_db, index);
         if (NULL == client) {
             fprintf(stderr, "Failed to get client from the client_db\n");
+            sem_post(&sem_queue);
             return NULL;
         }
 
@@ -104,21 +110,40 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
         char *city_name = client->city_name;
 
         printf("Thread %d is handling client %s\n", thread_id, client_name);
-        // end of processing
+        // end of processing part
 
-        (*num_clients_left)--;
-
-        // signal that the queue is not full now
-        pthread_cond_signal(&queue_not_full);
+        // unlock the queue access
+        sem_post(&sem_queue);
 
         /**
-         * if no client is left for processing after current processing,
-         * broadcast the conditional variable to have all threads that
-         * blocked by the conditional variable unblocked
+         * if no client is left for processing, wake up all threads
+         * waiting for items
          */
-        if (0 == *num_clients_left) pthread_cond_broadcast(&queue_not_empty);
+        if (0 == *num_clients_left) {
+            for (int i = 0; i != queue->max_size; i++)
+                if (-1 == sem_post(&sem_items)) {
+                    if (EAGAIN == errno)
+                        break;
+                    else {
+                        fprintf(
+                            stderr,
+                            "Failed to wake up threads waiting for items\n");
+                        perror(NULL);
+                        return NULL;
+                    }
+                }
+        }
 
-        pthread_mutex_unlock(&queue_access);
+        /**
+         * now there is at least one empty slot in the queue, wake
+         * up threads waiting for empty slots
+         */
+        if (-1 == sem_post(&sem_slots)) {
+            fprintf(stderr,
+                    "Failed to wake up threads waiting for empty slots\n");
+            perror(NULL);
+            return NULL;
+        }
         // END OF CRITICAL SECTION=============================================
 
         char *keywords = get_keywords(twitter_db, city_name);
