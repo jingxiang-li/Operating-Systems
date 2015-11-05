@@ -26,4 +26,9 @@ clean:
 
 .PHONEY: run-test
 run-test: $(TARGET)
+	./twitterTrend ./res/4061_PA03_to_be_released/client1.in 1
+	./twitterTrend ./res/4061_PA03_to_be_released/client2.in 1
+	./twitterTrend ./res/4061_PA03_to_be_released/client2.in 2
+	./twitterTrend ./res/4061_PA03_to_be_released/client2.in 3
 	./twitterTrend ./res/4061_PA03_to_be_released/client3.in 2
+	./twitterTrend ./res/4061_PA03_to_be_released/client4.in 3
