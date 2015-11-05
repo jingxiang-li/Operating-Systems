@@ -87,22 +87,8 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
             return NULL;
         }
 
+        // pop element from the queue and process it
         pop_result = pop(queue, &index);
-        (*num_clients_left)--;
-
-        // signal that the queue is not full now
-        pthread_cond_signal(&queue_not_full);
-
-        /**
-         * if no client is left for processing after current processing,
-         * broadcast the conditional variable to have all threads that
-         * blocked by the conditional variable unblocked
-         */
-        if (0 == *num_clients_left) pthread_cond_broadcast(&queue_not_empty);
-
-        pthread_mutex_unlock(&queue_access);
-        // END OF CRITICAL SECTION=============================================
-
         if (-1 == pop_result) {
             fprintf(stderr, "Failed to pop element from the queue\n");
             return NULL;
@@ -118,6 +104,22 @@ void *process_queue(Queue *queue, Client_DB *client_db, DB *twitter_db,
         char *city_name = client->city_name;
 
         printf("Thread %d is handling client %s\n", thread_id, client_name);
+        // end of processing
+
+        (*num_clients_left)--;
+
+        // signal that the queue is not full now
+        pthread_cond_signal(&queue_not_full);
+
+        /**
+         * if no client is left for processing after current processing,
+         * broadcast the conditional variable to have all threads that
+         * blocked by the conditional variable unblocked
+         */
+        if (0 == *num_clients_left) pthread_cond_broadcast(&queue_not_empty);
+
+        pthread_mutex_unlock(&queue_access);
+        // END OF CRITICAL SECTION=============================================
 
         char *keywords = get_keywords(twitter_db, city_name);
         if (NULL == keywords) {

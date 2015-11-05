@@ -60,22 +60,12 @@ int main(int argc, char **argv) {
     // multi-thread programming from here
 
     int push_result;
-
-    // initialize (fill) the queue
-    for (int i = 0; i != num_threads; i++) {
-        push_result = push(queue, i);
-        if (-1 == push_result) {
-            fprintf(stderr, "Failed to push integer %d to the queue\n", i);
-            exit(EXIT_FAILURE);
-        }
-    }
-
     pthread_t threads[num_threads];
 
     // initialize the argvs for each thread
     Queue_Process_Argv thread_argvs[num_threads];
 
-    // create threads
+    // create threads for pop elements from the queue and process them
     for (int i = 0; i != num_threads; i++) {
         thread_argvs[i].queue = queue;
         thread_argvs[i].client_db = client_db;
@@ -89,7 +79,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    for (int i = num_threads; i < client_db->size; i++) {
+    // push element to the queue in tha main thread
+    for (int i = 0; i < client_db->size; i++) {
         // CRITICAL SECTION====================================================
         pthread_mutex_lock(&queue_access);
 
@@ -100,17 +91,16 @@ int main(int argc, char **argv) {
         }
 
         push_result = push(queue, i);
+        if (-1 == push_result) {
+            fprintf(stderr, "Failed to push integer %d to the queue\n", i);
+            exit(EXIT_FAILURE);
+        }
 
         // signal that the queue is not empty now
         pthread_cond_signal(&queue_not_empty);
 
         pthread_mutex_unlock(&queue_access);
         // END OF CRITICAL SECTION=============================================
-
-        if (-1 == push_result) {
-            fprintf(stderr, "Failed to push integer %d to the queue\n", i);
-            exit(EXIT_FAILURE);
-        }
     }
 
     // Join threads
