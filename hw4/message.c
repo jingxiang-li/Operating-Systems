@@ -1,3 +1,12 @@
+/**
+ * this file contains functions for sending and receiving messages between
+ * client and host
+ *
+ * Author: Jingxiang Li
+ * Date: Thu 03 Dec 2015 07:57:00 PM CST
+ */
+
+#include "./message.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,15 +15,10 @@
 #include <unistd.h>
 #include <stdint.h>
 
-
 int send_uint32_t(int sockfd, uint32_t value) {
     size_t n = 0, n_total = 0;
     while (n_total != sizeof(uint32_t)) {
         n = write(sockfd, (char *)&value + n_total, sizeof(uint32_t) - n_total);
-        if (-1 == n) {
-            perror("ERROR, writing uint32_t to socket");
-            return -1;
-        }
         n_total += n;
     }
     return 0;
@@ -27,10 +31,6 @@ int send_str(int sockfd, char *str, uint32_t len) {
     size_t n = 0, n_total = 0;
     while (n_total != len) {
         n = write(sockfd, str + n_total, len - n_total);
-        if (-1 == n) {
-            perror("ERROR, writing string to socket");
-            return -1;
-        }
         n_total += n;
     }
     return 0;
@@ -43,7 +43,7 @@ int send_msg(int sockfd, uint32_t id, uint32_t payload_len, char *payload) {
     return 0;
 }
 
-char *receive_msg(int sockfd, uint32_t id, int *status) {
+char *receive_msg(int sockfd, uint32_t *id, int *status) {
     size_t n, n_total;
     uint32_t ret_id, payload_len;
     char *payload = NULL;
@@ -54,18 +54,12 @@ char *receive_msg(int sockfd, uint32_t id, int *status) {
     n_total = 0;
     while (n_total != sizeof(uint32_t)) {
         n = read(sockfd, (char *)&ret_id + n_total, sizeof(uint32_t) - n_total);
-        if (-1 == n) {
-            perror("ERROR, reading uint32_t from socket");
-            return NULL;
-        }
         n_total += n;
     }
-
-    if (ret_id != id) {
-        fprintf(stderr, "ERROR, should receive %d but receive %d from host\n",
-                id, ret_id);
-        return NULL;
-    }
+    //====================================================
+    // modify id here
+    *id = ret_id;
+    //=====================================================
 
     // read payload_len
     n = 0;
@@ -73,10 +67,6 @@ char *receive_msg(int sockfd, uint32_t id, int *status) {
     while (n_total != sizeof(uint32_t)) {
         n = read(sockfd, (char *)&payload_len + n_total,
                  sizeof(uint32_t) - n_total);
-        if (-1 == n) {
-            perror("ERROR, reading uint32_t from socket");
-            return NULL;
-        }
         n_total += n;
     }
 
@@ -99,10 +89,6 @@ char *receive_msg(int sockfd, uint32_t id, int *status) {
     n_total = 0;
     while (n_total != payload_len) {
         n = read(sockfd, payload + n_total, payload_len - n_total);
-        if (-1 == n) {
-            perror("ERROR, reading string from socket");
-            return NULL;
-        }
         n_total += n;
     }
 

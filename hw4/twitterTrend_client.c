@@ -5,9 +5,10 @@
  * Date: Thu 03 Dec 2015 05:02:13 PM CST
  */
 
+#include "./queue.h"
 #include "./client_db.h"
 #include "./message.h"
-#include "./utility.h"
+#include "./client_utility.h"
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdint.h>
@@ -17,8 +18,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#define BUFFER_SIZE 256
 
 int main(int argc, char **argv) {
     if (4 != argc) {
@@ -59,7 +58,7 @@ int main(int argc, char **argv) {
 
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
     server_addr.sin_family = AF_INET;
-    memcpy(&server_addr.sin_addr.s_addr, server_entry->h_addr,
+    memcpy(&server_addr.sin_addr.s_addr, server_entry->h_addr_list[0],
            server_entry->h_length);
     server_addr.sin_port = htons(server_port_number);
 
@@ -69,64 +68,63 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    // interact host =========================================
-    // used for recording number of bytes write to the socket
+    // INTERACT WITH HOST ==================================================
     uint32_t msg_id, payload_len;
     char *payload = NULL;
     int status;
 
-    // send shake message
-    msg_id = HANDSHAKE_ID;
-    payload_len = 0;
+    // receive hand shake message
+    receive_msg(sockfd, &msg_id, &status);
+    if (-1 == status || HANDSHAKE_ID != msg_id) {
+        fprintf(stderr,
+                "ERROR, failed to read hand shake response from host\n");
+        exit(EXIT_FAILURE);
+    }
 
-    if (-1 == send_msg(sockfd, msg_id, payload_len, NULL)) {
+    // send shake message response
+    if (-1 == send_msg(sockfd, HANDSHAKE_RESPONSE_ID, 0, NULL)) {
         fprintf(stderr, "ERROR, failed to send hand shake message to host\n");
         exit(EXIT_FAILURE);
     }
 
-    // receive hand shake response
-    msg_id = HANDSHAKE_RESPONSE_ID;
-    receive_msg(sockfd, msg_id, &status);
-    if (-1 == status) {
-        fprintf(stderr, "ERROR, failed to read hand shake response from host\n");
-        exit(EXIT_FAILURE);
-    }
-
     // send city names from the client_db and receive response from host
-    msg_id = TWITTERTREND_REQUEST_ID;
     for (int i = 0; i != client_db->size; i++) {
         // send request to host
+        // get client information
         Client *client = get_client(client_db, i);
         payload_len = strlen(client->city_name);
         payload = client->city_name;
-        if (-1 == send_msg(sockfd, msg_id, payload_len, payload)) {
+
+        if (-1 ==
+            send_msg(sockfd, TWITTERTREND_REQUEST_ID, payload_len, payload)) {
             fprintf(stderr, "ERROR, failed to send keywords request to host\n");
             exit(EXIT_FAILURE);
         }
 
         // receive keywords from host
-        msg_id = RESPONSE_MESSAGE_ID;
-        payload = receive_msg(sockfd, msg_id, &status);
-        if (NULL == payload || -1 == status) {
-            fprintf(stderr, "ERROR, failed to receive keywords from host for city %s\n", client->city_name);
+        payload = receive_msg(sockfd, &msg_id, &status);
+        if (-1 == status || RESPONSE_MESSAGE_ID != msg_id || NULL == payload) {
+            fprintf(stderr,
+                    "ERROR, failed to receive keywords from host for city %s\n",
+                    client->city_name);
             exit(EXIT_FAILURE);
         }
         printf("%s : %s\n", client->city_name, payload);
 
         // receive end of response message from host
-        msg_id = END_OF_RESPONSE_ID;
-        receive_msg(sockfd, msg_id, &status);
-        if (-1 == status) {
-            fprintf(stderr, "ERROR, failed to receive end of response message from host\n");
+        receive_msg(sockfd, &msg_id, &status);
+        if (-1 == status || END_OF_RESPONSE_ID != msg_id) {
+            fprintf(
+                stderr,
+                "ERROR, failed to receive end of response message from host\n");
             exit(EXIT_FAILURE);
         }
     }
 
     // send end of request message to host
-    msg_id = END_OF_REQUEST_ID;
-    payload_len = 0;
-    if (-1 == send_msg(sockfd, msg_id, payload_len, NULL)) {
-        fprintf(stderr, "ERROR, failed to send end of request message to host\n");
+    if (-1 == send_msg(sockfd, END_OF_REQUEST_ID, 0, NULL)) {
+        fprintf(stderr,
+                "ERROR, failed to send end of request message to host\n");
         exit(EXIT_FAILURE);
     }
 

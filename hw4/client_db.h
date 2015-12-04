@@ -26,7 +26,6 @@
  */
 typedef struct Client_t {
     int index;
-    char name[MAX_CLIENT_NAME_SIZE];
     char city_name[MAX_CITY_NAME_SIZE];
 } Client;
 
@@ -60,14 +59,6 @@ int free_client_db(Client_DB *client_db);
  * @return           0 on success; -1 otherwise
  */
 Client *get_client(Client_DB *client_db, int index);
-
-/**
- * get city name from a client file
- * @param  filepath  path to the client file
- * @param  city_name address to the city name string to be modified
- * @return           0 on success; otherwise -1;
- */
-int get_city_name(char *filepath, char *city_name);
 
 /**
  * print the client database to stdout
