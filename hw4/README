@@ -1,0 +1,23 @@
+/* CSci4061 Assignment 3
+* name: Jingxiang Li
+* id: lixx3899 */
+
+
+==========================
+Overview
+==========================
+- This is a "twitterTrend" program written in C that will concurrently process clients' requests for the top 3 trending keywords in different cities.
+
+==========================
+Compiling and Running
+==========================
+- To compile it, use: "make all", then executable file "twitterTrend" can be found in the current working directory
+- To run the program, use "./twitterTrend input_file_path num_threads"
+- To remove everything other than source files, use: "make clean"
+
+==========================
+Implementation
+==========================
+- This program will first read two databases, "twitter_db" for top 3 keywords in different cities, "client_db" for informations about clients waiting to be processed.
+- Then the program will create a shared queue, and then concurrently process clients' requests. The program will push client's request into the queue, and pop request from the queue one at a time and process the request in a concurrent and controlled way.
+- The program applies POSIX semaphore as synchronization mechanism to manage the access to the shared queue.
