@@ -10,8 +10,14 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 extern sem_t sem_queue, sem_items, sem_slots;
+
+static int kBufferSize = 32;
 
 void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
     if (queue == NULL || twitter_db == NULL) {
@@ -44,7 +50,11 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
         }
 
         // unlock the queue access
-        sem_post(&sem_queue);
+        if (-1 == sem_post(&sem_queue)) {
+            fprintf(stderr, "failed to wake up threads waiting for access to the queue\n");
+            perror(NULL);
+            return NULL;
+        }
 
         /**
          * now there is at least one empty slot in the queue, wake
@@ -57,6 +67,16 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
             return NULL;
         }
         // END OF CRITICAL SECTION=============================================
+
+        struct sockaddr_in cli_addr;
+        socklen_t cli_len = sizeof(cli_addr);
+        if (-1 == getpeername(sockfd, (struct sockaddr *)&cli_addr, &cli_len)) {
+            perror("ERROR, failed to get name of the client");
+            return NULL;
+        }
+        char client_name [kBufferSize];
+        sprintf(client_name, "%s,%d", inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port));
+        printf("Thread %d is handling client %s\n", thread_id, client_name);
 
 
         // INTERACT WITH CLIENT ======================================
@@ -71,7 +91,7 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
                     "ERROR, failed to send hand shake message to host\n");
             exit(EXIT_FAILURE);
         }
-        printf("send message here\n");
+        printf("server sends handshaking: (100,0,)\n");
 
         // receive hand shake response
         receive_msg(sockfd, &msg_id, &status);
@@ -108,14 +128,12 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
                 char *city_name = payload;
                 char *keywords = get_keywords(twitter_db, city_name);
                 if (NULL == keywords) {
-                    fprintf(stderr,
-                            "Failed to match %s in the twitter database\n",
-                            city_name);
-                    return NULL;
+                    keywords = (char *)malloc(8 * sizeof(char));
+                    sprintf(keywords, "NA");
                 }
 
                 // send response
-                payload_len = strlen(keywords);
+                payload_len = strlen(keywords) + 1;
                 payload = keywords;
                 if (-1 == send_msg(sockfd, RESPONSE_MESSAGE_ID, payload_len,
                                    payload)) {
@@ -123,6 +141,7 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
                             "ERROR, failed to send response to client\n");
                     return NULL;
                 }
+                printf("server sends twitterTrend response: (103,%d,\"%s\")\n", payload_len, payload);
 
                 // send end of response
                 if (-1 == send_msg(sockfd, END_OF_RESPONSE_ID, 0, NULL)) {
@@ -131,10 +150,12 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
                             "client\n");
                     return NULL;
                 }
+                printf("server sends end of response: (105,0,)\n");
             }
         }
         close(sockfd);
-        printf("Thread %d finished handling client\n", thread_id);
+        printf("server closes the connection\n");
+        printf("Thread %d finished handling client %s\n", thread_id, client_name);
     }
     return NULL;
 }

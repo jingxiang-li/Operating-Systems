@@ -18,6 +18,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+#include <libgen.h>
+
+static const int kBufferSize = 32;
 
 int main(int argc, char **argv) {
     if (4 != argc) {
@@ -38,6 +42,16 @@ int main(int argc, char **argv) {
 
     // change working directory to where the input file is
     if (-1 == change_wd(input_file_path)) exit(EXIT_FAILURE);
+
+    // create output file
+    char output_path[kBufferSize];
+    sprintf(output_path, "./%s.result", basename(input_file_path));
+    FILE *output_file = fopen(output_path, "w");
+    if (NULL == output_file) {
+        fprintf(stderr, "Failed to create file %s\n", output_path);
+        perror(NULL);
+        return -1;
+    }
 
     // create and initialize socket ====================================
     int sockfd;
@@ -62,11 +76,12 @@ int main(int argc, char **argv) {
            server_entry->h_length);
     server_addr.sin_port = htons(server_port_number);
 
-    if (-1 == connect(sockfd, (struct sockaddr *)&server_addr,
-                      sizeof(struct sockaddr_in))) {
+    if (-1 ==
+        connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr))) {
         perror("ERROR, failed to connect to the host");
         exit(EXIT_FAILURE);
     }
+    printf("client connects\n");
 
     // INTERACT WITH HOST ==================================================
     uint32_t msg_id, payload_len;
@@ -86,13 +101,14 @@ int main(int argc, char **argv) {
         fprintf(stderr, "ERROR, failed to send hand shake message to host\n");
         exit(EXIT_FAILURE);
     }
+    printf("client sends handshake response: (101,0,)\n");
 
     // send city names from the client_db and receive response from host
     for (int i = 0; i != client_db->size; i++) {
         // send request to host
         // get client information
         Client *client = get_client(client_db, i);
-        payload_len = strlen(client->city_name);
+        payload_len = strlen(client->city_name) + 1;
         payload = client->city_name;
 
         if (-1 ==
@@ -100,6 +116,8 @@ int main(int argc, char **argv) {
             fprintf(stderr, "ERROR, failed to send keywords request to host\n");
             exit(EXIT_FAILURE);
         }
+        printf("client sends twitterTrend request: (102,%d,\"%s\")\n",
+               payload_len, payload);
 
         // receive keywords from host
         payload = receive_msg(sockfd, &msg_id, &status);
@@ -109,7 +127,8 @@ int main(int argc, char **argv) {
                     client->city_name);
             exit(EXIT_FAILURE);
         }
-        printf("%s : %s\n", client->city_name, payload);
+        // printf("%s : %s\n", client->city_name, payload);
+        compile_output(output_file, client->city_name, payload);
 
         // receive end of response message from host
         receive_msg(sockfd, &msg_id, &status);
@@ -127,7 +146,9 @@ int main(int argc, char **argv) {
                 "ERROR, failed to send end of request message to host\n");
         exit(EXIT_FAILURE);
     }
+    printf("client sends end of request: (104,0,)\n");
 
     close(sockfd);
+    fclose(output_file);
     return 0;
 }

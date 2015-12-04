@@ -14,8 +14,6 @@
 #include <string.h>
 #include <unistd.h>
 
-static const int kBufferSize = 256;
-
 int change_wd(char *input_file_path) {
     char *input_path_dup, *wd;
     input_path_dup = strdup(input_file_path);
@@ -35,19 +33,7 @@ int change_wd(char *input_file_path) {
     return 0;
 }
 
-int compile_output(char *client_name, char *city_name, char *keywords) {
-    char output_path[kBufferSize];
-    sprintf(output_path, "./%s.result", client_name);
-
-    FILE *output_file = fopen(output_path, "w+");
-    if (NULL == output_file) {
-        fprintf(stderr, "Failed to create file %s\n", output_path);
-        perror(NULL);
-        return -1;
-    }
-
+int compile_output(FILE *output_file, char *city_name, char *keywords) {
     fprintf(output_file, "%s : %s\n", city_name, keywords);
-
-    fclose(output_file);
     return 0;
 }

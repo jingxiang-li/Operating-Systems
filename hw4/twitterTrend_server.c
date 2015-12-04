@@ -19,6 +19,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #ifndef LOCKS
 #define LOCKS
@@ -97,9 +98,11 @@ int main(int argc, char **argv) {
     }
 
     listen(sockfd, 5);
+    printf("server listens\n");
 
     while (1) {
         newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
+        printf("server accepts connection\n");
         // don't close it, child thread will close it
         if (-1 == newsockfd) {
             fprintf(stderr, "ERROR, Failed to accept connection\n");
