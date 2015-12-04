@@ -18,3 +18,4 @@ clean:
 	@rm -f ./*.o
 	@rm -f twitterTrend_server twitterTrend_client
 	@rm -f ./res/PA4_released/*.result
+	@rm -f ./res/PA4_released/*.temp

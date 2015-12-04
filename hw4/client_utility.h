@@ -19,7 +19,7 @@
 int change_wd(char *input_file_path);
 
 /**
- * compile the output file for the client, named "client_name.result"
+ * compile the output file for the client
  * @param  output_file output file
  * @param  city_name   name of the city
  * @param  keywords    keywords

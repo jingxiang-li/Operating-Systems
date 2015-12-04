@@ -133,7 +133,7 @@ void *process_queue(Queue *queue, DB *twitter_db, int thread_id) {
                 }
 
                 // send response
-                payload_len = strlen(keywords) + 1;
+                payload_len = strlen(keywords);
                 payload = keywords;
                 if (-1 == send_msg(sockfd, RESPONSE_MESSAGE_ID, payload_len,
                                    payload)) {

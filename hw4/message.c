@@ -79,7 +79,8 @@ char *receive_msg(int sockfd, uint32_t *id, int *status) {
     //===============================================================
 
     // read string
-    payload = (char *)malloc(payload_len * sizeof(char));
+    payload = (char *)malloc((payload_len + 1) * sizeof(char));
+    memset(payload, '\0', payload_len + 1);
     if (NULL == payload) {
         perror("ERROR, failed to allocate space for payload");
         return NULL;
