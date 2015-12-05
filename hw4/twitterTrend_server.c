@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    listen(sockfd, 5);
+    listen(sockfd, 100);
     printf("server listens\n");
 
     while (1) {
