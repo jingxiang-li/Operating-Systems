@@ -102,7 +102,7 @@ char *get_keywords(DB *db, char *city_name) {
         }
     }
 
-    fprintf(stderr, "Failed to match the city_name %s\n", city_name);
+    // fprintf(stderr, "Failed to match the city_name %s\n", city_name);
     return NULL;
 }
 
